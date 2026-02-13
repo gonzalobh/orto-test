@@ -331,6 +331,41 @@
       min-height: 100px;
     }
 
+    .instruction-field {
+      position: relative;
+    }
+
+    .instruction-hint {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      min-height: 100px;
+      padding: 0.75rem 1rem;
+      color: #9CA3AF;
+      font-size: 1.1rem;
+      line-height: 1.6;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 400ms ease, transform 400ms ease;
+      pointer-events: none;
+      user-select: none;
+      white-space: normal;
+      z-index: 1;
+    }
+
+    .instruction-hint.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .instruction-hint {
+        transition: none;
+        transform: none;
+      }
+    }
+
     textarea:focus,
     input[type="text"]:focus,
     select:focus {
@@ -1663,11 +1698,14 @@
 
           <div class="input-group">
             <label class="input-label" for="instruction">¿Qué quieres comunicar?</label>
-            <textarea 
-              id="instruction" 
-              placeholder="Escribe la idea en pocas palabras…"
-              maxlength="300"
-            ></textarea>
+            <div class="instruction-field">
+              <textarea
+                id="instruction"
+                maxlength="300"
+                aria-label="Describe brevemente el email que deseas generar"
+              ></textarea>
+              <div class="instruction-hint" aria-hidden="true"></div>
+            </div>
             <div class="char-counter">
               <span id="charCount">0</span>/300
             </div>
@@ -1693,7 +1731,7 @@
               aria-controls="advancedOptionsPanel"
             >
               <span class="advanced-chevron" aria-hidden="true">▼</span>
-              <span>⚙️ Opciones avanzadas</span>
+              <span>Opciones avanzadas</span>
             </button>
           </div>
 
@@ -1815,6 +1853,7 @@
     const versionsMenu = document.getElementById('versionsMenu');
     const versionsOptions = Array.from(document.querySelectorAll('.versions-option'));
     const charCount = document.getElementById('charCount');
+    const instructionHintEl = document.querySelector('.instruction-hint');
     const strategyButtons = Array.from(document.querySelectorAll('.strategy-btn:not(#versionsButton)'));
     const strategyMenus = Array.from(document.querySelectorAll('.strategy-menu:not(#versionsMenu)'));
     const modeButtons = Array.from(document.querySelectorAll('.mode-toggle-btn'));
@@ -1832,6 +1871,18 @@
     const ADVANCED_OPTIONS_STATE_KEY = 'advanced_options_open_v1';
     let currentOutputTab = 'new';
     let isGenerating = false;
+    let instructionHintIndex = 0;
+    let instructionHintCycleTimer = null;
+    let instructionHintResumeTimer = null;
+    let instructionHintTransitionTimer = null;
+
+    const INSTRUCTION_EXAMPLES = [
+      "enviar email para felicitar a un empleado por su cumpleaños",
+      "responder a un cliente que pide descuento y rechazar amablemente",
+      "agradecer una reunión y resumir los próximos pasos",
+      "pedir documentos pendientes de forma cordial",
+      "anunciar cambio de horario al equipo"
+    ];
 
     function normalizeText(value) {
       return (value || '')
@@ -1960,6 +2011,81 @@
       generateButton.disabled = shouldDisableGenerateButton();
     }
 
+
+    function clearInstructionHintTimers() {
+      if (instructionHintCycleTimer) {
+        clearInterval(instructionHintCycleTimer);
+        instructionHintCycleTimer = null;
+      }
+      if (instructionHintResumeTimer) {
+        clearTimeout(instructionHintResumeTimer);
+        instructionHintResumeTimer = null;
+      }
+      if (instructionHintTransitionTimer) {
+        clearTimeout(instructionHintTransitionTimer);
+        instructionHintTransitionTimer = null;
+      }
+    }
+
+    function setInstructionHintVisible(isVisible) {
+      if (!instructionHintEl) return;
+      instructionHintEl.classList.toggle('is-visible', isVisible);
+    }
+
+    function showInstructionHint(index) {
+      if (!instructionHintEl || !INSTRUCTION_EXAMPLES.length) return;
+      instructionHintEl.textContent = INSTRUCTION_EXAMPLES[index];
+      window.requestAnimationFrame(() => setInstructionHintVisible(true));
+    }
+
+    function rotateInstructionHint() {
+      if (!instructionHintEl) return;
+      setInstructionHintVisible(false);
+      instructionHintTransitionTimer = setTimeout(() => {
+        instructionHintIndex = (instructionHintIndex + 1) % INSTRUCTION_EXAMPLES.length;
+        showInstructionHint(instructionHintIndex);
+      }, 400);
+    }
+
+    function stopInstructionHint({ hide = true } = {}) {
+      clearInstructionHintTimers();
+      if (!instructionHintEl) return;
+      if (hide) {
+        setInstructionHintVisible(false);
+        instructionHintEl.textContent = '';
+      }
+    }
+
+    function startInstructionHint() {
+      if (!instructionEl || !instructionHintEl) return;
+      if (instructionEl.value.trim()) {
+        stopInstructionHint();
+        return;
+      }
+
+      clearInstructionHintTimers();
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      showInstructionHint(instructionHintIndex);
+
+      if (reduceMotion) return;
+
+      instructionHintCycleTimer = setInterval(rotateInstructionHint, 3200);
+    }
+
+    function queueInstructionHintResume() {
+      if (!instructionEl) return;
+      clearInstructionHintTimers();
+      if (instructionEl.value.trim()) {
+        stopInstructionHint();
+        return;
+      }
+      instructionHintResumeTimer = setTimeout(() => {
+        if (!instructionEl.value.trim()) {
+          startInstructionHint();
+        }
+      }, 1500);
+    }
+
     function setMode(mode) {
       currentMode = mode;
 
@@ -1975,11 +2101,6 @@
         originalEmailGroupEl.classList.toggle('mode-hidden', !isReply);
       }
 
-      if (instructionEl) {
-        instructionEl.placeholder = isReply
-          ? 'Indica cómo quieres responder al email recibido…'
-          : 'Escribe la idea en pocas palabras…';
-      }
 
       // Renderizar el estado vacío con preview cuando se cambia de modo
       renderEmptyState();
@@ -2848,8 +2969,23 @@ ${body}`.trim();
       });
     }
 
+    instructionEl.addEventListener('focus', () => {
+      stopInstructionHint();
+    });
+
+    instructionEl.addEventListener('blur', () => {
+      if (!instructionEl.value.trim()) {
+        queueInstructionHintResume();
+      }
+    });
+
     instructionEl.addEventListener('input', () => {
       charCount.textContent = instructionEl.value.length;
+      if (instructionEl.value.trim()) {
+        stopInstructionHint();
+      } else {
+        queueInstructionHintResume();
+      }
       updatePreviewIfEmpty();
       updateGenerateButtonState();
       if ((formalityPrefEl?.value || 'auto') === 'auto') {
@@ -3071,6 +3207,7 @@ ${body}`.trim();
       const exampleItem = event.target.closest('.example-item');
       if (exampleItem && exampleItem.dataset.example) {
         instructionEl.value = exampleItem.dataset.example;
+        stopInstructionHint();
         instructionEl.focus();
         charCount.textContent = instructionEl.value.length;
         updatePreviewIfEmpty();
@@ -3171,6 +3308,7 @@ ${body}`.trim();
       }
     });
 
+    startInstructionHint();
     setMode('compose');
     initAdvancedOptions();
     initOutputTabs();
