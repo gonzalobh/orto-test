@@ -340,29 +340,24 @@
       top: 0;
       left: 0;
       width: 100%;
+      max-width: 92%;
       min-height: 100px;
       padding: 0.75rem 1rem;
-      color: #9CA3AF;
+      color: #6b7280;
       font-size: 1.1rem;
+      font-style: normal;
       line-height: 1.6;
       opacity: 0;
-      transform: translateY(6px);
-      transition: opacity 400ms ease, transform 400ms ease;
+      transition: opacity 260ms ease;
       pointer-events: none;
       user-select: none;
       white-space: normal;
       z-index: 1;
     }
 
-    .instruction-hint.is-visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
     @media (prefers-reduced-motion: reduce) {
       .instruction-hint {
         transition: none;
-        transform: none;
       }
     }
 
@@ -2014,7 +2009,7 @@
 
     function clearInstructionHintTimers() {
       if (instructionHintCycleTimer) {
-        clearInterval(instructionHintCycleTimer);
+        clearTimeout(instructionHintCycleTimer);
         instructionHintCycleTimer = null;
       }
       if (instructionHintResumeTimer) {
@@ -2027,33 +2022,34 @@
       }
     }
 
-    function setInstructionHintVisible(isVisible) {
-      if (!instructionHintEl) return;
-      instructionHintEl.classList.toggle('is-visible', isVisible);
+    function randomDelay() {
+      return 2600 + Math.random() * 1600;
     }
 
-    function showInstructionHint(index) {
-      if (!instructionHintEl || !INSTRUCTION_EXAMPLES.length) return;
-      instructionHintEl.textContent = INSTRUCTION_EXAMPLES[index];
-      window.requestAnimationFrame(() => setInstructionHintVisible(true));
-    }
-
-    function rotateInstructionHint() {
+    function cycleInstructionHint() {
       if (!instructionHintEl) return;
-      setInstructionHintVisible(false);
+      instructionHintEl.style.opacity = '0';
       instructionHintTransitionTimer = setTimeout(() => {
         instructionHintIndex = (instructionHintIndex + 1) % INSTRUCTION_EXAMPLES.length;
-        showInstructionHint(instructionHintIndex);
-      }, 400);
+        instructionHintEl.textContent = INSTRUCTION_EXAMPLES[instructionHintIndex];
+        instructionHintEl.style.opacity = '1';
+      }, 220);
+    }
+
+    function runInstructionHintCycle() {
+      cycleInstructionHint();
+      instructionHintCycleTimer = setTimeout(runInstructionHintCycle, randomDelay());
     }
 
     function stopInstructionHint({ hide = true } = {}) {
-      clearInstructionHintTimers();
       if (!instructionHintEl) return;
       if (hide) {
-        setInstructionHintVisible(false);
-        instructionHintEl.textContent = '';
+        instructionHintEl.style.transition = 'opacity 150ms ease';
+        instructionHintEl.style.opacity = '0';
       }
+      instructionHintTransitionTimer = setTimeout(() => {
+        clearInstructionHintTimers();
+      }, 160);
     }
 
     function startInstructionHint() {
@@ -2065,11 +2061,14 @@
 
       clearInstructionHintTimers();
       const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      showInstructionHint(instructionHintIndex);
+      instructionHintIndex = 0;
+      instructionHintEl.style.transition = reduceMotion ? 'none' : 'opacity 260ms ease';
+      instructionHintEl.textContent = INSTRUCTION_EXAMPLES[0];
+      instructionHintEl.style.opacity = '1';
 
       if (reduceMotion) return;
 
-      instructionHintCycleTimer = setInterval(rotateInstructionHint, 3200);
+      instructionHintCycleTimer = setTimeout(runInstructionHintCycle, randomDelay());
     }
 
     function queueInstructionHintResume() {
@@ -2083,7 +2082,7 @@
         if (!instructionEl.value.trim()) {
           startInstructionHint();
         }
-      }, 1500);
+      }, 2000);
     }
 
     function setMode(mode) {
