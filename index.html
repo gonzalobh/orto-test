@@ -428,37 +428,55 @@
     }
 
     .segmented-control {
+      position: relative;
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 0.375rem;
-      padding: 0.25rem;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
+      gap: 0;
+      padding: 4px;
+      background: #f4f4f5;
+      border: 1px solid #ececf1;
+      border-radius: 12px;
+      isolation: isolate;
+      --formality-index: 2;
+    }
+
+    .segmented-indicator {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      width: calc((100% - 8px) / 3);
+      height: calc(100% - 8px);
+      background: #ffffff;
       border-radius: 10px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+      transform: translateX(calc(var(--formality-index) * 100%));
+      z-index: 0;
     }
 
     .formality-btn {
       background: transparent;
       border: none;
-      border-radius: 8px;
-      color: var(--text-secondary);
+      border-radius: 10px;
+      color: #71717a;
       font-family: inherit;
-      font-size: 0.8125rem;
+      font-size: 14px;
       font-weight: 500;
       padding: 0.5rem 0.625rem;
       cursor: pointer;
-      transition: all 0.15s ease;
+      transition: color 200ms cubic-bezier(0.22, 1, 0.36, 1);
+      position: relative;
+      z-index: 1;
     }
 
     .formality-btn:hover,
     .formality-btn:focus-visible {
-      color: var(--text-primary);
+      color: #18181b;
       outline: none;
     }
 
     .formality-btn.active {
-      background: var(--text-primary);
-      color: white;
+      color: #18181b;
     }
 
     .advanced-toggle-row {
@@ -1656,7 +1674,8 @@
 
           <div class="input-group">
             <label class="input-label" for="formalityPreference">Nivel de formalidad</label>
-            <div class="segmented-control" role="radiogroup" aria-label="Nivel de formalidad">
+            <div class="segmented-control" id="formalityControl" role="radiogroup" aria-label="Nivel de formalidad">
+              <span class="segmented-indicator" aria-hidden="true"></span>
               <button class="formality-btn" type="button" role="radio" aria-checked="false" data-formality="tu">Tú (cercano)</button>
               <button class="formality-btn" type="button" role="radio" aria-checked="false" data-formality="usted">Usted (formal)</button>
               <button class="formality-btn active" type="button" role="radio" aria-checked="true" data-formality="auto">Automático</button>
@@ -1778,6 +1797,7 @@
     const advancedOptionsToggleEl = document.getElementById('advancedOptionsToggle');
     const advancedOptionsPanelEl = document.getElementById('advancedOptionsPanel');
     const formalityPrefEl = document.getElementById('formalityPreference');
+    const formalityControlEl = document.getElementById('formalityControl');
     const formalityBtns = Array.from(document.querySelectorAll('.formality-btn'));
     const outputEl = document.getElementById('output');
     const tabNewBtn = document.getElementById('tabNew');
@@ -1826,10 +1846,13 @@
       if (formalityPrefEl) {
         formalityPrefEl.value = next;
       }
-      formalityBtns.forEach((btn) => {
+      formalityBtns.forEach((btn, index) => {
         const selected = btn.dataset.formality === next;
         btn.classList.toggle('active', selected);
         btn.setAttribute('aria-checked', selected ? 'true' : 'false');
+        if (selected && formalityControlEl) {
+          formalityControlEl.style.setProperty('--formality-index', String(index));
+        }
       });
     }
 
