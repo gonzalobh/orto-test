@@ -1483,6 +1483,69 @@
     ::-webkit-scrollbar-thumb:hover {
       background: #d0d0d0;
     }
+
+    /* ===== Focus Entry Mode (Google-like) ===== */
+
+    .main-content {
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.35s ease, transform 0.35s ease;
+    }
+
+    .main-content.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Pantalla inicial */
+    .focus-entry {
+      position: fixed;
+      inset: 0;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+      transition: opacity 0.35s ease, transform 0.35s ease;
+    }
+
+    .focus-entry.hidden {
+      opacity: 0;
+      transform: translateY(-12px);
+      pointer-events: none;
+    }
+
+    /* Caja centrada */
+    .focus-box {
+      width: min(720px, 92%);
+      text-align: center;
+    }
+
+    .focus-title {
+      font-size: 2rem;
+      font-weight: 500;
+      letter-spacing: -0.02em;
+      margin-bottom: 1.25rem;
+    }
+
+    /* textarea inicial */
+    #instructionFocus {
+      width: 100%;
+      min-height: 140px;
+      font-family: inherit;
+      font-size: 1rem;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1rem;
+      resize: none;
+      transition: all 0.2s ease;
+    }
+
+    #instructionFocus:focus {
+      outline: none;
+      border-color: var(--text-primary);
+      box-shadow: 0 0 0 3px rgba(0,0,0,0.05);
+    }
   </style>
 </head>
 <body>
@@ -1490,6 +1553,17 @@
     <header>
       <h1>Redactar.ai</h1>
     </header>
+
+    <!-- Focus Entry Screen -->
+    <div class="focus-entry" id="focusEntry">
+      <div class="focus-box">
+        <div class="focus-title">¿Qué quieres comunicar?</div>
+        <textarea
+          id="instructionFocus"
+          placeholder="Escribe la idea en pocas palabras…"
+        ></textarea>
+      </div>
+    </div>
 
     <!-- Barra de controles superior -->
     <div class="controls-bar">
@@ -3031,6 +3105,43 @@ ${body}`.trim();
         }
       });
     })();
+  </script>
+  <script>
+    /* ===== Focus Entry Behaviour ===== */
+
+    const focusEntry = document.getElementById('focusEntry');
+    const focusInput = document.getElementById('instructionFocus');
+    const realInstruction = document.getElementById('instruction');
+    const mainContent = document.querySelector('.main-content');
+
+    /* Activa el layout real */
+    function revealApp(text) {
+      if (!focusEntry.classList.contains('hidden')) {
+        focusEntry.classList.add('hidden');
+        mainContent.classList.add('is-visible');
+
+        /* sincroniza contenido */
+        realInstruction.value = text;
+        realInstruction.dispatchEvent(new Event('input'));
+
+        setTimeout(() => realInstruction.focus(), 150);
+      }
+    }
+
+    /* Detecta cuando el usuario empieza a escribir */
+    focusInput.addEventListener('input', (e) => {
+      if (e.target.value.trim().length > 0) {
+        revealApp(e.target.value);
+      }
+    });
+
+    /* Si hay texto preexistente (ej: historial) */
+    window.addEventListener('DOMContentLoaded', () => {
+      if (realInstruction.value.trim().length > 0) {
+        focusEntry.classList.add('hidden');
+        mainContent.classList.add('is-visible');
+      }
+    });
   </script>
 </body>
 </html>
