@@ -461,6 +461,63 @@
       color: white;
     }
 
+    .advanced-toggle-row {
+      margin: -0.5rem 0 1rem;
+    }
+
+    .advanced-toggle-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: transparent;
+      border: none;
+      padding: 0;
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: color 0.15s ease;
+    }
+
+    .advanced-toggle-btn:hover,
+    .advanced-toggle-btn:focus-visible {
+      color: var(--text-primary);
+      outline: none;
+    }
+
+    .advanced-chevron {
+      display: inline-block;
+      font-size: 0.65rem;
+      transform: rotate(0deg);
+      transition: transform 0.2s ease;
+    }
+
+    .advanced-toggle-btn[aria-expanded="true"] .advanced-chevron {
+      transform: rotate(180deg);
+    }
+
+    .advanced-options-panel {
+      max-height: 220px;
+      opacity: 1;
+      transform: translateY(0);
+      overflow: hidden;
+      transition: max-height 0.25s ease, opacity 0.25s ease, transform 0.25s ease, margin-bottom 0.25s ease;
+      margin-bottom: 1.25rem;
+    }
+
+    .advanced-options-panel.is-collapsed {
+      max-height: 0;
+      opacity: 0;
+      transform: translateY(-6px);
+      margin-bottom: 0;
+      pointer-events: none;
+    }
+
+    .advanced-options-panel .input-row:last-child {
+      margin-bottom: 0;
+    }
+
     .strategy-dropdown {
       position: relative;
     }
@@ -1597,44 +1654,6 @@
             </div>
           </div>
 
-          <div class="input-row">
-            <div class="input-group">
-              <label class="input-label" for="senderName">De</label>
-              <input 
-                type="text"
-                id="senderName" 
-                placeholder="Juan Pérez" 
-              />
-            </div>
-            <div class="input-group">
-              <label class="input-label" for="clientName">Para</label>
-              <input 
-                type="text"
-                id="clientName" 
-                placeholder="María García" 
-              />
-            </div>
-          </div>
-
-          <div class="input-row">
-            <div class="input-group">
-              <label class="input-label" for="senderRole">Cargo (opcional)</label>
-              <input
-                type="text"
-                id="senderRole"
-                placeholder="Gerente de Ventas"
-              />
-            </div>
-            <div class="input-group">
-              <label class="input-label" for="recipientRole">Cargo (opcional)</label>
-              <input
-                type="text"
-                id="recipientRole"
-                placeholder="Directora de RRHH"
-              />
-            </div>
-          </div>
-
           <div class="input-group">
             <label class="input-label" for="formalityPreference">Nivel de formalidad</label>
             <div class="segmented-control" role="radiogroup" aria-label="Nivel de formalidad">
@@ -1643,6 +1662,59 @@
               <button class="formality-btn active" type="button" role="radio" aria-checked="true" data-formality="auto">Automático</button>
             </div>
             <input type="hidden" id="formalityPreference" value="auto" />
+          </div>
+
+          <div class="advanced-toggle-row">
+            <button
+              class="advanced-toggle-btn"
+              id="advancedOptionsToggle"
+              type="button"
+              aria-expanded="false"
+              aria-controls="advancedOptionsPanel"
+            >
+              <span class="advanced-chevron" aria-hidden="true">▼</span>
+              <span>⚙️ Opciones avanzadas</span>
+            </button>
+          </div>
+
+          <div class="advanced-options-panel is-collapsed" id="advancedOptionsPanel" aria-hidden="true">
+            <div class="input-row">
+              <div class="input-group">
+                <label class="input-label" for="senderName">De</label>
+                <input
+                  type="text"
+                  id="senderName"
+                  placeholder="Juan Pérez"
+                />
+              </div>
+              <div class="input-group">
+                <label class="input-label" for="clientName">Para</label>
+                <input
+                  type="text"
+                  id="clientName"
+                  placeholder="María García"
+                />
+              </div>
+            </div>
+
+            <div class="input-row">
+              <div class="input-group">
+                <label class="input-label" for="senderRole">Cargo (opcional)</label>
+                <input
+                  type="text"
+                  id="senderRole"
+                  placeholder="Gerente de Ventas"
+                />
+              </div>
+              <div class="input-group">
+                <label class="input-label" for="recipientRole">Cargo (opcional)</label>
+                <input
+                  type="text"
+                  id="recipientRole"
+                  placeholder="Directora de RRHH"
+                />
+              </div>
+            </div>
           </div>
 
           <div class="generate-row">
@@ -1703,6 +1775,8 @@
     const clientNameEl = document.getElementById('clientName');
     const senderRoleEl = document.getElementById('senderRole');
     const recipientRoleEl = document.getElementById('recipientRole');
+    const advancedOptionsToggleEl = document.getElementById('advancedOptionsToggle');
+    const advancedOptionsPanelEl = document.getElementById('advancedOptionsPanel');
     const formalityPrefEl = document.getElementById('formalityPreference');
     const formalityBtns = Array.from(document.querySelectorAll('.formality-btn'));
     const outputEl = document.getElementById('output');
@@ -1734,6 +1808,7 @@
     let isInteractingWithPopover = false;
 
     const HISTORY_KEY = 'emails_history_v1';
+    const ADVANCED_OPTIONS_STATE_KEY = 'advanced_options_open_v1';
     let currentOutputTab = 'new';
     let isGenerating = false;
 
@@ -1755,6 +1830,24 @@
         const selected = btn.dataset.formality === next;
         btn.classList.toggle('active', selected);
         btn.setAttribute('aria-checked', selected ? 'true' : 'false');
+      });
+    }
+
+    function setAdvancedOptionsOpen(isOpen) {
+      if (!advancedOptionsToggleEl || !advancedOptionsPanelEl) return;
+      advancedOptionsToggleEl.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      advancedOptionsPanelEl.classList.toggle('is-collapsed', !isOpen);
+      advancedOptionsPanelEl.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+      sessionStorage.setItem(ADVANCED_OPTIONS_STATE_KEY, isOpen ? 'open' : 'closed');
+    }
+
+    function initAdvancedOptions() {
+      if (!advancedOptionsToggleEl || !advancedOptionsPanelEl) return;
+      const savedState = sessionStorage.getItem(ADVANCED_OPTIONS_STATE_KEY);
+      setAdvancedOptionsOpen(savedState === 'open');
+      advancedOptionsToggleEl.addEventListener('click', () => {
+        const isOpen = advancedOptionsToggleEl.getAttribute('aria-expanded') === 'true';
+        setAdvancedOptionsOpen(!isOpen);
       });
     }
 
@@ -3055,6 +3148,7 @@ ${body}`.trim();
     });
 
     setMode('compose');
+    initAdvancedOptions();
     initOutputTabs();
     renderEmptyState(); // Inicializar con el estado vacío mejorado
     updateGenerateButtonState();
