@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -515,11 +516,6 @@
       transform: rotate(180deg);
     }
 
-    .advanced-toggle-icon {
-      width: 14px;
-      height: 14px;
-    }
-
     .advanced-options-panel {
       max-height: 220px;
       opacity: 1;
@@ -651,18 +647,6 @@
       display: flex;
       align-items: stretch;
       gap: 0.625rem;
-      max-height: 64px;
-      opacity: 1;
-      transform: translateY(0);
-      overflow: hidden;
-      transition: max-height 0.25s ease, opacity 0.25s ease, transform 0.25s ease;
-    }
-
-    .generate-row.is-hidden {
-      max-height: 0;
-      opacity: 0;
-      transform: translateY(-6px);
-      pointer-events: none;
     }
 
     .generate-row .generate-btn {
@@ -1709,8 +1693,7 @@
               aria-controls="advancedOptionsPanel"
             >
               <span class="advanced-chevron" aria-hidden="true">▼</span>
-              <i data-lucide="sliders-horizontal" class="advanced-toggle-icon" aria-hidden="true"></i>
-              <span>Opciones avanzadas</span>
+              <span>⚙️ Opciones avanzadas</span>
             </button>
           </div>
 
@@ -1754,7 +1737,7 @@
             </div>
           </div>
 
-          <div class="generate-row is-hidden" id="generateRow">
+          <div class="generate-row">
             <button class="generate-btn" id="generateButton" type="button">
               <span class="btn-content">
                 <span class="spinner"></span>
@@ -1825,7 +1808,6 @@
     const historyListEl = document.getElementById('historyList');
     const clearHistoryBtn = document.getElementById('clearHistoryBtn');
     const generateButton = document.getElementById('generateButton');
-    const generateRow = document.getElementById('generateRow');
     const buttonText = document.getElementById('buttonText');
     const versionsControl = document.querySelector('.versions-control');
     const versionsButton = document.getElementById('versionsButton');
@@ -1976,12 +1958,6 @@
       }
 
       generateButton.disabled = shouldDisableGenerateButton();
-    }
-
-    function updateGenerateRowVisibility() {
-      if (!generateRow || !instructionEl) return;
-      const hasInstruction = Boolean(instructionEl.value.trim());
-      generateRow.classList.toggle('is-hidden', !hasInstruction);
     }
 
     function setMode(mode) {
@@ -2227,7 +2203,6 @@
       if (typeof entry.instruction === 'string') {
         instructionEl.value = entry.instruction;
         charCount.textContent = instructionEl.value.length;
-        updateGenerateRowVisibility();
         updatePreviewIfEmpty();
       }
     }
@@ -2876,7 +2851,6 @@ ${body}`.trim();
     instructionEl.addEventListener('input', () => {
       charCount.textContent = instructionEl.value.length;
       updatePreviewIfEmpty();
-      updateGenerateRowVisibility();
       updateGenerateButtonState();
       if ((formalityPrefEl?.value || 'auto') === 'auto') {
         resolveFormality();
@@ -3201,7 +3175,6 @@ ${body}`.trim();
     initAdvancedOptions();
     initOutputTabs();
     renderEmptyState(); // Inicializar con el estado vacío mejorado
-    updateGenerateRowVisibility();
     updateGenerateButtonState();
   </script>
   <script src="https://unpkg.com/lucide@latest"></script>
