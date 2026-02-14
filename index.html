@@ -125,7 +125,7 @@
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
     }
 
     .section-label-end {
@@ -1295,27 +1295,6 @@
       word-break: break-word;
     }
 
-    .version-copy-btn {
-      background: var(--bg-primary);
-      color: var(--text-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 0.5rem 1rem;
-      font-family: inherit;
-      font-size: 0.8125rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-
-    .version-copy-btn:hover:not(:disabled),
-    .version-copy-btn:focus-visible {
-      background: var(--bg-secondary);
-      border-color: var(--text-primary);
-      color: var(--text-primary);
-      outline: none;
-    }
-
     .version-copy-btn.copied {
       background: var(--text-primary);
       color: white;
@@ -1326,31 +1305,51 @@
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      flex-wrap: wrap;
+      padding-top: 1rem;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .version-actions .icon-btn,
+    .restore-original-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      border: 0;
+      background: transparent;
+      padding: 0.375rem 0.75rem;
+      border-radius: 0.375rem;
+      cursor: pointer;
+      color: #374151;
+      font-size: 0.875rem;
+      line-height: 1.25rem;
+      transition: background-color 0.15s ease, color 0.15s ease;
+      opacity: 1;
+      justify-content: flex-start;
+    }
+
+    .version-actions .icon-btn:hover,
+    .version-actions .icon-btn:focus-visible,
+    .restore-original-btn:hover:not(:disabled),
+    .restore-original-btn:focus-visible {
+      background: #f3f4f6;
+      color: #111827;
+      outline: none;
     }
 
     .translate-dropdown {
       position: relative;
+      margin-left: auto;
     }
 
     .translate-btn {
-      background: transparent;
-      color: var(--text-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
-      padding: 0.45rem 0.875rem;
-      font-family: inherit;
-      font-size: 0.75rem;
-      cursor: pointer;
-      transition: all 0.15s ease;
+      margin-left: auto;
     }
 
     .translate-btn:hover:not(:disabled),
     .translate-btn:focus-visible,
     .translate-btn[aria-expanded="true"] {
-      background: var(--bg-primary);
-      border-color: #d0d0d0;
-      color: var(--text-primary);
+      background: #f3f4f6;
+      color: #111827;
       outline: none;
     }
 
@@ -1361,6 +1360,7 @@
 
     .restore-original-btn {
       display: none;
+      margin-left: 0.25rem;
     }
 
     .restore-original-btn.visible {
