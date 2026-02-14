@@ -1590,52 +1590,6 @@
       background: #d0d0d0;
     }
 
-
-    /* ===== Initial Single Panel Mode ===== */
-
-    .main-content.initial {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .main-content.initial .left-panel {
-      max-width: 720px;
-      width: 100%;
-      transform: translateX(0);
-      transition: transform 0.45s cubic-bezier(.2,.8,.2,1);
-    }
-
-    .main-content.initial .right-panel {
-      display: none;
-    }
-
-    /* ===== Activated Two-Column Mode ===== */
-
-    .main-content.active {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-    }
-
-    .main-content.active .left-panel {
-      transform: translateX(0);
-    }
-
-    .main-content.active .right-panel {
-      display: block;
-      animation: revealRight 0.45s cubic-bezier(.2,.8,.2,1);
-    }
-
-    @keyframes revealRight {
-      from {
-        opacity: 0;
-        transform: translateX(40px);
-      }
-      to {
-        opacity: 1;
-        transform: translateX(0);
-      }
-    }
   </style>
 </head>
 <body>
@@ -1678,7 +1632,7 @@
       </div>
     </div>
 
-    <div class="main-content initial" id="mainContent">
+    <div class="main-content" id="mainContent">
       <!-- Panel izquierdo -->
       <div class="left-panel">
         <div class="form-container">
@@ -3219,13 +3173,6 @@ ${body}`.trim();
 
 
     generateButton.addEventListener('click', () => {
-      const mainContent = document.getElementById('mainContent');
-
-      if (mainContent.classList.contains('initial')) {
-        mainContent.classList.remove('initial');
-        mainContent.classList.add('active');
-      }
-
       generateEmail();
     });
     outputEl.addEventListener('click', handleOutputClick);
