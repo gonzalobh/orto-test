@@ -1870,6 +1870,7 @@
     let instructionHintCycleTimer = null;
     let instructionHintResumeTimer = null;
     let instructionHintTransitionTimer = null;
+    let instructionHintTypingTimer = null;
 
     const INSTRUCTION_EXAMPLES = [
       "enviar email para felicitar a un empleado por su cumpleaños",
@@ -2020,10 +2021,39 @@
         clearTimeout(instructionHintTransitionTimer);
         instructionHintTransitionTimer = null;
       }
+      if (instructionHintTypingTimer) {
+        clearTimeout(instructionHintTypingTimer);
+        instructionHintTypingTimer = null;
+      }
     }
 
     function randomDelay() {
-      return 2600 + Math.random() * 1600;
+      return 1000 + Math.random() * 500;
+    }
+
+    function typeInstructionHint(example) {
+      if (!instructionHintEl) return;
+      const words = example.split(/\s+/).filter(Boolean);
+      let currentWordIndex = 0;
+
+      instructionHintEl.textContent = '';
+
+      function typeNextWord() {
+        if (!instructionHintEl) return;
+        currentWordIndex += 1;
+        instructionHintEl.textContent = words.slice(0, currentWordIndex).join(' ');
+
+        if (currentWordIndex >= words.length) {
+          instructionHintCycleTimer = setTimeout(runInstructionHintCycle, randomDelay());
+          return;
+        }
+
+        const lastWord = words[currentWordIndex - 1] || '';
+        const punctuationPause = /[.,;:!?]$/.test(lastWord) ? 20 : 0;
+        instructionHintTypingTimer = setTimeout(typeNextWord, 42 + Math.random() * 34 + punctuationPause);
+      }
+
+      typeNextWord();
     }
 
     function cycleInstructionHint() {
@@ -2031,14 +2061,13 @@
       instructionHintEl.style.opacity = '0';
       instructionHintTransitionTimer = setTimeout(() => {
         instructionHintIndex = (instructionHintIndex + 1) % INSTRUCTION_EXAMPLES.length;
-        instructionHintEl.textContent = INSTRUCTION_EXAMPLES[instructionHintIndex];
         instructionHintEl.style.opacity = '1';
+        typeInstructionHint(INSTRUCTION_EXAMPLES[instructionHintIndex]);
       }, 220);
     }
 
     function runInstructionHintCycle() {
       cycleInstructionHint();
-      instructionHintCycleTimer = setTimeout(runInstructionHintCycle, randomDelay());
     }
 
     function stopInstructionHint({ hide = true } = {}) {
@@ -2063,12 +2092,14 @@
       const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       instructionHintIndex = 0;
       instructionHintEl.style.transition = reduceMotion ? 'none' : 'opacity 260ms ease';
-      instructionHintEl.textContent = INSTRUCTION_EXAMPLES[0];
       instructionHintEl.style.opacity = '1';
 
-      if (reduceMotion) return;
+      if (reduceMotion) {
+        instructionHintEl.textContent = INSTRUCTION_EXAMPLES[0];
+        return;
+      }
 
-      instructionHintCycleTimer = setTimeout(runInstructionHintCycle, randomDelay());
+      typeInstructionHint(INSTRUCTION_EXAMPLES[0]);
     }
 
     function queueInstructionHintResume() {
