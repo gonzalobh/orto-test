@@ -91,7 +91,7 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       grid-auto-rows: 1fr;
-      gap: 2rem;
+      gap: clamp(32px, 4vw, 56px);
       padding: 2rem;
       max-width: 1400px;
       margin: 0 auto;
@@ -102,7 +102,7 @@
     /* Panel izquierdo limpio */
     .left-panel {
       background: #f2f1f0;
-      padding: 2.5rem;
+      padding: 28px 32px 32px 32px;
       border-radius: 12px;
       border: 1px solid var(--border-color);
       box-shadow: var(--shadow-sm);
@@ -328,7 +328,15 @@
     }
 
     #instruction {
-      min-height: 100px;
+      width: 100%;
+      min-height: 88px;
+      max-height: 320px;
+      resize: none;
+      line-height: 1.5;
+      padding: 14px 16px;
+      border-radius: 12px;
+      transition: height 0.15s ease,
+                  box-shadow 0.2s ease;
     }
 
     .instruction-field {
@@ -341,12 +349,12 @@
       left: 0;
       width: 100%;
       max-width: 92%;
-      min-height: 100px;
-      padding: 0.75rem 1rem;
+      min-height: 88px;
+      padding: 14px 16px;
       color: #6b7280;
       font-size: 1.1rem;
       font-style: normal;
-      line-height: 1.6;
+      line-height: 1.5;
       opacity: 0;
       transition: opacity 260ms ease;
       pointer-events: none;
@@ -755,7 +763,8 @@
     /* Panel derecho limpio */
     .right-panel {
       background: #f2f1f0;
-      padding: 2.5rem;
+      padding: 28px 32px 32px 32px;
+      margin-top: 4px;
       border-radius: 12px;
       border: 1px solid var(--border-color);
       box-shadow: var(--shadow-sm);
@@ -1825,6 +1834,15 @@
     let instructionHintResumeTimer = null;
     let instructionHintTransitionTimer = null;
     let instructionHintTypingTimer = null;
+
+    function autoGrow(el) {
+      if (!el) return;
+      el.style.height = 'auto';
+      el.style.height = Math.min(el.scrollHeight, 320) + 'px';
+    }
+
+    instructionEl.addEventListener('input', () => autoGrow(instructionEl));
+    window.addEventListener('load', () => autoGrow(instructionEl));
 
     const INSTRUCTION_EXAMPLES = [
       "enviar email para felicitar a un empleado por su cumpleaños",
