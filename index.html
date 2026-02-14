@@ -61,31 +61,25 @@
       letter-spacing: -0.02em;
     }
 
-    /* Barra de controles superior */
-    .controls-bar {
-      padding: 1.5rem 2rem;
-      max-width: 1400px;
-      margin: 0 auto;
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-    }
-
-    .controls-left {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    .controls-right {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
     /* Layout principal */
+    .panel-toolbar {
+      grid-column: 1 / -1;
+      display: flex;
+      justify-content: flex-start;
+      margin-bottom: -1rem;
+      padding-left: 0.5rem;
+    }
+
+    .main-content.initial .panel-toolbar {
+      justify-content: center;
+      padding-left: 0;
+    }
+
+    .main-content.active .panel-toolbar {
+      justify-content: flex-start;
+      padding-left: 0;
+    }
+
     .main-content {
       flex: 1;
       display: grid;
@@ -102,7 +96,7 @@
     /* Panel izquierdo limpio */
     .left-panel {
       background: #f2f1f0;
-      padding: 2.5rem;
+      padding: 3.25rem 2.5rem 2.5rem;
       border-radius: 12px;
       border: 1px solid var(--border-color);
       box-shadow: var(--shadow-sm);
@@ -1533,19 +1527,6 @@
         font-size: 1rem;
       }
 
-      .controls-bar {
-        padding: 1rem 1.25rem;
-        flex-direction: column;
-        align-items: stretch;
-        gap: 0.75rem;
-      }
-
-      .controls-left,
-      .controls-right {
-        width: 100%;
-        justify-content: center;
-      }
-
       .main-content {
         padding: 1rem;
       }
@@ -1645,43 +1626,44 @@
     </header>
 
 
-    <!-- Barra de controles superior -->
-    <div class="controls-bar">
-      <div class="controls-left">
+    <div class="main-content initial" id="mainContent">
+      <div class="panel-toolbar">
         <div class="mode-toggle" role="tablist" aria-label="Modo de generación">
-          <button class="mode-toggle-btn icon-left active" id="modeCompose" type="button" data-mode="compose" role="tab" aria-selected="true">
+          <button class="mode-toggle-btn icon-left active" id="modeCompose" type="button" data-mode="compose">
             <i data-lucide="pencil"></i><span>Redactar</span>
           </button>
 
-          <button class="mode-toggle-btn icon-left" id="replyBtn" type="button" data-mode="reply" role="tab" aria-selected="false">
+          <button class="mode-toggle-btn icon-left" id="replyBtn" type="button" data-mode="reply">
             <i data-lucide="reply"></i><span>Responder</span>
           </button>
         </div>
       </div>
 
-      <div class="controls-right">
-        <div class="custom-select-wrapper">
-          <button class="custom-select-btn" id="recipientRegionBtn" type="button" aria-haspopup="true" aria-expanded="false">
-            <span id="recipientRegionText">No especificada</span>
-            <i data-lucide="chevron-down" class="select-arrow"></i>
-          </button>
-          <ul class="custom-select-menu" id="recipientRegionMenu" role="menu" hidden>
-            <li role="none"><button class="custom-select-option selected" type="button" role="menuitemradio" aria-checked="true" data-value="">No especificada</button></li>
-            <li role="none"><button class="custom-select-option" type="button" role="menuitemradio" aria-checked="false" data-value="Spain">España</button></li>
-            <li role="none"><button class="custom-select-option" type="button" role="menuitemradio" aria-checked="false" data-value="Mexico">México</button></li>
-            <li role="none"><button class="custom-select-option" type="button" role="menuitemradio" aria-checked="false" data-value="Argentina">Argentina</button></li>
-            <li role="none"><button class="custom-select-option" type="button" role="menuitemradio" aria-checked="false" data-value="Chile">Chile</button></li>
-            <li role="none"><button class="custom-select-option" type="button" role="menuitemradio" aria-checked="false" data-value="Colombia">Colombia</button></li>
-          </ul>
-          <input type="hidden" id="recipientRegion" value="">
-        </div>
-      </div>
-    </div>
-
-    <div class="main-content initial" id="mainContent">
       <!-- Panel izquierdo -->
       <div class="left-panel">
         <div class="form-container">
+          <div class="section-label">
+            <div class="section-label-row">
+              <span class="section-label-title">Región del destinatario</span>
+              <div class="section-label-end">
+                <div class="custom-select-wrapper">
+                  <button class="custom-select-btn" id="recipientRegionBtn" type="button" aria-haspopup="true" aria-expanded="false">
+                    <span id="recipientRegionText">No especificada</span>
+                    <i data-lucide="chevron-down" class="select-arrow"></i>
+                  </button>
+                  <ul class="custom-select-menu" id="recipientRegionMenu" role="menu" hidden>
+                    <li role="none"><button class="custom-select-option selected" type="button" role="menuitemradio" aria-checked="true" data-value="">No especificada</button></li>
+                    <li role="none"><button class="custom-select-option" type="button" role="menuitemradio" aria-checked="false" data-value="Spain">España</button></li>
+                    <li role="none"><button class="custom-select-option" type="button" role="menuitemradio" aria-checked="false" data-value="Mexico">México</button></li>
+                    <li role="none"><button class="custom-select-option" type="button" role="menuitemradio" aria-checked="false" data-value="Argentina">Argentina</button></li>
+                    <li role="none"><button class="custom-select-option" type="button" role="menuitemradio" aria-checked="false" data-value="Chile">Chile</button></li>
+                    <li role="none"><button class="custom-select-option" type="button" role="menuitemradio" aria-checked="false" data-value="Colombia">Colombia</button></li>
+                  </ul>
+                  <input type="hidden" id="recipientRegion" value="">
+                </div>
+              </div>
+            </div>
+          </div>
 
           <div class="input-group collapsible-group mode-hidden" id="originalEmailGroup">
             <label class="input-label" for="originalEmail">Email original</label>
