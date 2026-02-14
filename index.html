@@ -853,17 +853,319 @@
 
     /* Output cards */
     .output-cards {
-      display: block;
+      display: grid;
+      gap: 0.875rem;
     }
 
-    .output-loading-minimal {
+    .output-empty,
+    .output-loading {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 1.75rem;
+      min-height: 180px;
+      font-size: 0.8125rem;
+      color: var(--text-tertiary);
       display: flex;
       align-items: center;
       justify-content: center;
-      min-height: 140px;
-      font-size: 0.9rem;
+      text-align: center;
+      position: relative;
+    }
+
+    /* Estado vacío mejorado */
+    .empty-state {
+      display: grid;
+      gap: 1.25rem;
+    }
+
+    /* Preview en tiempo real */
+    .preview-card {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: all 0.15s ease;
+    }
+
+    .preview-card-header {
+      font-size: 0.75rem;
+      font-weight: 600;
       color: var(--text-secondary);
-      letter-spacing: 0.01em;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .preview-icon {
+      width: 16px;
+      height: 16px;
+      opacity: 0.6;
+    }
+
+    .preview-field {
+      margin-bottom: 0.75rem;
+      font-size: 0.875rem;
+    }
+
+    .preview-label {
+      color: var(--text-secondary);
+      font-weight: 500;
+      margin-right: 0.5rem;
+    }
+
+    .preview-value {
+      color: var(--text-primary);
+    }
+
+    .preview-value.empty {
+      color: var(--text-tertiary);
+      font-style: italic;
+    }
+
+    .preview-context {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 0.875rem;
+      margin-top: 0.875rem;
+      font-size: 0.8125rem;
+      line-height: 1.5;
+      color: var(--text-secondary);
+      min-height: 200px;
+      font-style: italic;
+    }
+
+    .preview-context.empty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-tertiary);
+    }
+
+    .preview-meta {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .preview-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 0.375rem;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+
+    .preview-badge {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 0.25rem 0.5rem;
+      font-size: 0.6875rem;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    /* Tips contextuales */
+    .tips-panel {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tips-panel::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 3px;
+      height: 100%;
+      background: var(--text-primary);
+    }
+
+    .tips-icon {
+      width: 24px;
+      height: 24px;
+      margin-bottom: 0.75rem;
+      opacity: 0.7;
+    }
+
+    .tips-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+
+    .tips-content {
+      font-size: 0.9375rem;
+      line-height: 1.6;
+      color: var(--text-primary);
+      transition: all 0.4s ease;
+    }
+
+    .tips-content.fade-out {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+
+    .tips-content.fade-in {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Ejemplos de casos de uso */
+    .examples-panel {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+
+    .examples-header {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 1rem;
+    }
+
+    .examples-grid {
+      display: grid;
+      gap: 0.625rem;
+    }
+
+    .example-item {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.875rem 1rem;
+      font-size: 0.8125rem;
+      color: var(--text-primary);
+      transition: all 0.15s ease;
+      cursor: pointer;
+      position: relative;
+      padding-left: 2.25rem;
+    }
+
+    .example-item::before {
+      content: '📧';
+      position: absolute;
+      left: 0.875rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.875rem;
+    }
+
+    .example-item:hover {
+      background: var(--bg-tertiary);
+      border-color: var(--text-secondary);
+      transform: translateX(4px);
+    }
+
+    /* Skeleton loader premium */
+    .skeleton-loader {
+      display: grid;
+      gap: 1.25rem;
+    }
+
+    .skeleton-card {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .skeleton-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+      animation: shimmer 2s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { left: -100%; }
+      100% { left: 100%; }
+    }
+
+    .skeleton-line {
+      height: 12px;
+      background: var(--bg-primary);
+      border-radius: 6px;
+      margin-bottom: 0.625rem;
+      opacity: 0.6;
+    }
+
+    .skeleton-line.title {
+      height: 14px;
+      width: 40%;
+      margin-bottom: 1rem;
+    }
+
+    .skeleton-line.short {
+      width: 70%;
+    }
+
+    .skeleton-line.long {
+      width: 95%;
+    }
+
+    .skeleton-progress {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      padding: 2rem 0;
+    }
+
+    .skeleton-spinner {
+      width: 48px;
+      height: 48px;
+      border: 3px solid var(--border-color);
+      border-top-color: var(--accent-gray);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    .skeleton-status {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .skeleton-substatus {
+      font-size: 0.75rem;
+      color: var(--text-tertiary);
+      margin-top: 0.25rem;
+    }
+
+    .output-loading::after {
+      content: '';
+      position: absolute;
+      bottom: 1.25rem;
+      left: 1.25rem;
+      width: 2px;
+      height: 18px;
+      background: var(--text-primary);
+      animation: blink 1s infinite;
     }
 
     .history-list {
@@ -1437,7 +1739,9 @@
 
           <div class="output-panels">
             <div id="panelNew" class="output-panel" role="tabpanel">
-              <div id="output" class="output-cards"></div>
+              <div id="output" class="output-cards">
+                <div class="output-empty">El email generado aparecerá aquí...</div>
+              </div>
             </div>
             <div id="panelHistory" class="output-panel" role="tabpanel" hidden>
               <div id="historyList" class="history-list"></div>
@@ -1748,6 +2052,9 @@
       }
 
 
+      // Renderizar el estado vacío con preview cuando se cambia de modo
+      renderEmptyState();
+
       updateGenerateButtonState();
     }
 
@@ -1967,31 +2274,157 @@
       if (typeof entry.instruction === 'string') {
         instructionEl.value = entry.instruction;
         charCount.textContent = instructionEl.value.length;
+        updatePreviewIfEmpty();
       }
     }
 
-    function showLoadingState() {
-      if (!outputEl) return;
+    // Tips contextuales que rotan
+    const contextualTips = {
+      compose: [
+        'Sé específico en tu instrucción para mejores resultados',
+        'Menciona el objetivo del email para un tono más preciso',
+        'Incluye detalles clave que quieras resaltar',
+        'Especifica si necesitas un tono formal o casual'
+      ],
+      reply: [
+        'Resume el contexto clave del email original',
+        'Especifica qué quieres lograr con tu respuesta',
+        'Menciona si necesitas agregar nueva información',
+        'Indica el nivel de urgencia si es relevante'
+      ]
+    };
+
+    const useCaseExamples = [
+      'Seguimiento de propuesta comercial',
+      'Respuesta a solicitud de presupuesto',
+      'Agradecimiento post-reunión',
+      'Actualización de proyecto en curso',
+      'Solicitud de información adicional',
+      'Confirmación de próximos pasos',
+      'Recordatorio amable de pendientes',
+      'Presentación de nuevo servicio'
+    ];
+
+    let currentTipIndex = 0;
+    let tipsRotationInterval = null;
+
+    function rotateTips() {
+      const tips = contextualTips[currentMode] || contextualTips.compose;
+      const tipsContent = document.querySelector('.tips-content');
+      if (!tipsContent) return;
+
+      tipsContent.classList.add('fade-out');
+      
+      setTimeout(() => {
+        currentTipIndex = (currentTipIndex + 1) % tips.length;
+        tipsContent.textContent = tips[currentTipIndex];
+        tipsContent.classList.remove('fade-out');
+        tipsContent.classList.add('fade-in');
+        
+        setTimeout(() => {
+          tipsContent.classList.remove('fade-in');
+        }, 400);
+      }, 200);
+    }
+
+    function startTipsRotation() {
+      stopTipsRotation();
+      tipsRotationInterval = setInterval(rotateTips, 5000);
+    }
+
+    function stopTipsRotation() {
+      if (tipsRotationInterval) {
+        clearInterval(tipsRotationInterval);
+        tipsRotationInterval = null;
+      }
+    }
+
+    function getRandomExamples(count = 4) {
+      const shuffled = [...useCaseExamples].sort(() => 0.5 - Math.random());
+      return shuffled.slice(0, count);
+    }
+
+    function renderEmptyState() {
+      hideSelectionPopover();
+      stopTipsRotation();
+      
+      const instruction = instructionEl.value.trim();
+      const senderName = senderNameEl.value.trim() || 'Tu nombre';
+      const clientName = clientNameEl.value.trim() || 'Destinatario';
+      const tips = contextualTips[currentMode] || contextualTips.compose;
+      const examples = getRandomExamples();
+
       outputEl.innerHTML = `
-        <div class="output-loading-minimal">
-          Analizando contexto...
+        <div class="empty-state">
+          <!-- Preview en tiempo real -->
+          <div class="preview-card">
+            <div class="preview-card-header">
+              <svg class="preview-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+              </svg>
+              Vista previa
+            </div>
+            <div class="preview-field">
+              <span class="preview-label">De:</span>
+              <span class="preview-value">${senderName}</span>
+            </div>
+            <div class="preview-field">
+              <span class="preview-label">Para:</span>
+              <span class="preview-value">${clientName}</span>
+            </div>
+            <div class="preview-context ${instruction ? '' : 'empty'}">
+              ${instruction || 'Escribe tu instrucción para ver un preview...'}
+            </div>
+            <div class="preview-meta"></div>
+          </div>
+
+
+    
+      `;
+
+      // Iniciar rotación de tips
+      setTimeout(() => {
+        currentTipIndex = 0;
+        startTipsRotation();
+      }, 100);
+    }
+
+    function renderLoadingState(substatusText) {
+      hideSelectionPopover();
+      stopTipsRotation();
+      
+      outputEl.innerHTML = `
+        <div class="skeleton-loader">
+          <div class="skeleton-progress">
+            <div class="skeleton-spinner"></div>
+            <div class="skeleton-status">Analizando contexto...</div>
+            <div class="skeleton-substatus">${substatusText || 'Generando email profesional'}</div>
+          </div>
+          
+          <div class="skeleton-card">
+            <div class="skeleton-line title"></div>
+            <div class="skeleton-line long"></div>
+            <div class="skeleton-line long"></div>
+            <div class="skeleton-line short"></div>
+          </div>
+
+          <div class="skeleton-card">
+            <div class="skeleton-line title"></div>
+            <div class="skeleton-line long"></div>
+            <div class="skeleton-line short"></div>
+            <div class="skeleton-line long"></div>
+          </div>
         </div>
       `;
     }
 
-    function renderResult(text) {
-      if (!outputEl) return;
-
-      outputEl.innerHTML = `
-        <div style="
-          white-space: pre-wrap;
-          font-size: 0.95rem;
-          line-height: 1.6;
-          color: var(--text-primary);
-        ">
-          ${text}
-        </div>
-      `;
+    function renderPlaceholder(message, loading = false) {
+      if (loading) {
+        renderLoadingState(message);
+      } else {
+        renderEmptyState();
+      }
     }
 
     function handleCopyClick(event) {
@@ -2409,11 +2842,53 @@ ${body}`.trim();
     }
 
     function renderVersions(versions) {
-      const primaryVersion = Array.isArray(versions) && versions.length > 0 ? versions[0] : null;
-      if (!primaryVersion) return;
-      renderResult(`Asunto: ${primaryVersion.subject}
+      hideSelectionPopover();
+      outputEl.innerHTML = '';
+      versions.forEach((item, index) => {
+        const card = document.createElement('article');
+        card.className = 'version-card fade-in';
+        card.innerHTML = `
+          <span class="version-label">Versión ${index + 1}</span>
+          <div class="version-section">
+            <div class="version-title">Asunto</div>
+            <div class="version-content" data-role="email-subject">${escapeHtml(item.subject)}</div>
+          </div>
+          <div class="version-section">
+            <div class="version-title">Cuerpo</div>
+            <div class="version-content" data-role="email-body">${escapeHtml(item.body)}</div>
+          </div>
+          <div class="version-actions">
+            <button class="icon-btn version-copy-btn" type="button" data-subject="${encodeURIComponent(item.subject)}" data-body="${encodeURIComponent(item.body)}">
+              <i data-lucide="copy"></i>
+              <span>Copiar</span>
+            </button>
 
-${primaryVersion.body}`);
+            <button class="icon-btn expand-btn" type="button">
+              <i data-lucide="maximize-2"></i>
+              <span>Expandir</span>
+            </button>
+
+            <button class="icon-btn shorten-btn" type="button">
+              <i data-lucide="minimize-2"></i>
+              <span>Acortar</span>
+            </button>
+
+            <div class="translate-dropdown">
+              <button class="icon-btn translate-btn" type="button" aria-haspopup="true" aria-expanded="false"><i data-lucide="languages"></i><span>Traducir</span></button>
+              <ul class="translate-menu" role="menu" aria-label="Idiomas de traducción">
+                <li role="none"><button class="translate-option" type="button" role="menuitem" data-lang="English">Inglés</button></li>
+                <li role="none"><button class="translate-option" type="button" role="menuitem" data-lang="French">Francés</button></li>
+                <li role="none"><button class="translate-option" type="button" role="menuitem" data-lang="German">Alemán</button></li>
+              </ul>
+            </div>
+            <button class="version-copy-btn restore-original-btn" type="button">Volver al original</button>
+          </div>
+        `;
+        outputEl.appendChild(card);
+      });
+      if (window.lucide) {
+        window.lucide.createIcons();
+      }
     }
 
     async function generateEmailFromAI({ instruction, context, isRewrite }) {
@@ -2461,6 +2936,7 @@ ${primaryVersion.body}`);
       } else {
         queueInstructionHintResume();
       }
+      updatePreviewIfEmpty();
       updateGenerateButtonState();
       if ((formalityPrefEl?.value || 'auto') === 'auto') {
         resolveFormality();
@@ -2542,7 +3018,35 @@ ${primaryVersion.body}`);
       }
     });
 
+    senderNameEl.addEventListener('input', updatePreviewIfEmpty);
+    clientNameEl.addEventListener('input', updatePreviewIfEmpty);
+
     setFormalityPreference(formalityPrefEl?.value || 'auto');
+
+    function updatePreviewIfEmpty() {
+      // Solo actualizar si estamos en estado vacío
+      const emptyState = outputEl.querySelector('.empty-state');
+      if (!emptyState) return;
+
+      const instruction = instructionEl.value.trim();
+      const senderName = senderNameEl.value.trim() || 'Tu nombre';
+      const clientName = clientNameEl.value.trim() || 'Destinatario';
+
+      const previewSender = emptyState.querySelector('.preview-field .preview-value');
+      const previewClient = emptyState.querySelectorAll('.preview-field .preview-value')[1];
+      const previewContext = emptyState.querySelector('.preview-context');
+
+      if (previewSender) previewSender.textContent = senderName;
+      if (previewClient) previewClient.textContent = clientName;
+      if (previewContext) {
+        previewContext.textContent = instruction || 'Escribe tu instrucción para ver un preview...';
+        if (instruction) {
+          previewContext.classList.remove('empty');
+        } else {
+          previewContext.classList.add('empty');
+        }
+      }
+    }
 
     async function generateEmail() {
       const instruction = instructionEl.value.trim();
@@ -2565,7 +3069,10 @@ ${primaryVersion.body}`);
       generateButton.classList.add('generating');
       versionsButton.disabled = true;
       buttonText.textContent = 'Generando...';
-      showLoadingState();
+      const loadingSub = (selectedVersions === 3)
+        ? 'Generando +2 variantes profesionales'
+        : 'Generando email profesional';
+      renderPlaceholder(loadingSub, true);
 
       try {
         const res = await fetch('/api/email', {
@@ -2586,7 +3093,7 @@ ${primaryVersion.body}`);
         });
 
         if (!res.ok) {
-          renderResult('No se pudieron generar los emails.');
+          renderPlaceholder('No se pudieron generar los emails.');
           return;
         }
 
@@ -2602,7 +3109,7 @@ ${primaryVersion.body}`);
           : [];
 
         if (parsedVersions.length === 0) {
-          renderResult('No se recibió contenido para mostrar.');
+          renderPlaceholder('No se recibió contenido para mostrar.');
           return;
         }
         renderVersions(parsedVersions);
@@ -2620,7 +3127,7 @@ ${primaryVersion.body}`);
           renderHistory();
         }
       } catch {
-        renderResult('Error de conexión.');
+        renderPlaceholder('Error de conexión.');
       } finally {
         isGenerating = false;
         generateButton.classList.remove('generating');
@@ -2637,6 +3144,18 @@ ${primaryVersion.body}`);
     outputEl.addEventListener('click', handleOutputClick);
     historyListEl?.addEventListener('click', handleHistoryClick);
     clearHistoryBtn?.addEventListener('click', clearHistory);
+
+    // Event delegation para ejemplos clicables
+    outputEl.addEventListener('click', (event) => {
+      const exampleItem = event.target.closest('.example-item');
+      if (exampleItem && exampleItem.dataset.example) {
+        instructionEl.value = exampleItem.dataset.example;
+        stopInstructionHint();
+        instructionEl.focus();
+        charCount.textContent = instructionEl.value.length;
+        updatePreviewIfEmpty();
+      }
+    });
 
     outputEl.addEventListener('click', async (event) => {
       const expandBtn = event.target.closest('.expand-btn');
@@ -2735,6 +3254,7 @@ ${primaryVersion.body}`);
     startInstructionHint();
     setMode('compose');
     initOutputTabs();
+    renderEmptyState(); // Inicializar con el estado vacío mejorado
     updateGenerateButtonState();
   </script>
   <script src="https://unpkg.com/lucide@latest"></script>
