@@ -385,17 +385,23 @@
       font-size: 12px;
       padding: 6px 10px;
       border-radius: 8px;
-      background: #ffffff;
-      border: 1px solid var(--border-color);
+      background: transparent;
+      border: none;
       color: var(--text-secondary);
       cursor: pointer;
-      transition: all .15s ease;
-      box-shadow: var(--shadow-sm);
+      transition: opacity .25s ease, background-color .15s ease, transform .25s ease;
+      opacity: 0;
+      transform: translateY(4px);
+    }
+
+    .save-template-floating.visible {
+      opacity: 1;
+      transform: translateY(0);
     }
 
     .save-template-floating:hover {
+      background-color: #fafaf9;
       color: var(--text-primary);
-      border-color: var(--text-primary);
     }
 
     .instruction-hint {
@@ -1774,8 +1780,8 @@
               <label class="input-label" for="instruction">¿Qué quieres comunicar?</label>
 
               <button id="templatesBtn" class="icon-btn" type="button" aria-haspopup="true" aria-expanded="false">
-                <i data-lucide="folder"></i>
-                Planillas
+                <i data-lucide="form"></i>
+                Plantilla
               </button>
               <div class="custom-select-menu" id="templatesMenu" role="menu" hidden></div>
             </div>
@@ -1787,8 +1793,7 @@
               ></textarea>
               <button id="saveTemplateFloating"
                 class="save-template-floating"
-                type="button"
-                hidden>
+                type="button">
                 Guardar como plantilla
               </button>
               <div class="instruction-hint" aria-hidden="true"></div>
@@ -3575,20 +3580,29 @@ ${body}`.trim();
       });
     });
 
+    function countWords(text) {
+      return text.trim().split(/\s+/).filter(Boolean).length;
+    }
+
     instructionEl.addEventListener('input', () => {
       const value = instructionEl.value.trim();
 
       if (!value) {
-        saveBtn.hidden = true;
+        saveBtn.classList.remove('visible');
+        return;
+      }
+
+      if (countWords(value) < 3) {
+        saveBtn.classList.remove('visible');
         return;
       }
 
       if (templateExists(value)) {
-        saveBtn.hidden = true;
+        saveBtn.classList.remove('visible');
         return;
       }
 
-      saveBtn.hidden = false;
+      saveBtn.classList.add('visible');
     });
 
     saveBtn?.addEventListener('click', () => {
@@ -3609,7 +3623,7 @@ ${body}`.trim();
       saveTemplates(list);
       renderTemplateMenu();
 
-      saveBtn.hidden = true;
+      saveBtn.classList.remove('visible');
     });
 
     templatesBtn?.addEventListener('click', (event) => {
