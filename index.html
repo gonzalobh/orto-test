@@ -464,6 +464,34 @@
       z-index: 4;
     }
 
+    .formalidad-tooltip {
+      position: absolute;
+      right: 12px;
+      bottom: 64px;
+      background: #2b2b2b;
+      color: white;
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transform: translateY(4px);
+      transition: opacity 0.15s ease, transform 0.15s ease;
+      z-index: 5;
+    }
+
+    .formalidad-tooltip::after {
+      content: "";
+      position: absolute;
+      right: 14px;
+      bottom: -4px;
+      width: 8px;
+      height: 8px;
+      background: #2b2b2b;
+      transform: rotate(45deg);
+    }
+
     .formalidad-dropdown button {
       background: none;
       border: none;
@@ -1798,15 +1826,18 @@
             <div class="instruction-wrapper">
               <textarea
                 id="instruction"
-                placeholder="Escribe la idea en pocas palabras…"
                 maxlength="300"
                 aria-label="Describe brevemente el email que deseas generar"
               ></textarea>
 
               <button id="formalidadTrigger" class="formalidad-trigger" type="button">
-                Formalidad
+                <span class="formalidad-label">Formalidad</span>
                 <i data-lucide="chevron-down"></i>
               </button>
+
+              <div id="formalidadTooltip" class="formalidad-tooltip hidden">
+                Formalidad
+              </div>
 
               <div id="formalidadDropdown" class="formalidad-dropdown hidden">
                 <button type="button" data-value="auto">Automático</button>
@@ -1917,6 +1948,7 @@
     const senderRoleEl = document.getElementById('senderRole');
     const recipientRoleEl = document.getElementById('clientRole');
     const trigger = document.getElementById('formalidadTrigger');
+    const tooltip = document.getElementById('formalidadTooltip');
     const dropdown = document.getElementById('formalidadDropdown');
     const outputEl = document.getElementById('output');
     const tabNewBtn = document.getElementById('tabNew');
@@ -1960,6 +1992,8 @@
     let instructionHintTransitionTimer = null;
     let instructionHintTypingTimer = null;
     let formalidadValue = 'auto';
+    let tooltipTimeout;
+    let tooltipHideTimeout;
 
 
     function autoGrow(el) {
@@ -1992,12 +2026,31 @@
       dropdown?.classList.toggle('hidden');
     });
 
+    trigger?.addEventListener('mouseenter', () => {
+      clearTimeout(tooltipHideTimeout);
+      tooltipTimeout = setTimeout(() => {
+        if (!tooltip) return;
+        tooltip.classList.remove('hidden');
+        tooltip.style.opacity = '1';
+        tooltip.style.transform = 'translateY(0)';
+      }, 250);
+    });
+
+    trigger?.addEventListener('mouseleave', () => {
+      clearTimeout(tooltipTimeout);
+      if (!tooltip) return;
+      tooltip.style.opacity = '0';
+      tooltip.style.transform = 'translateY(4px)';
+      tooltipHideTimeout = setTimeout(() => tooltip.classList.add('hidden'), 120);
+    });
+
     dropdown?.querySelectorAll('button').forEach((btn) => {
       btn.addEventListener('click', () => {
         formalidadValue = btn.dataset.value || 'auto';
 
         if (trigger) {
-          trigger.childNodes[0].nodeValue = `${btn.innerText.split('(')[0].trim()} `;
+          const triggerLabel = trigger.querySelector('.formalidad-label');
+          if (triggerLabel) triggerLabel.textContent = btn.innerText.split('(')[0].trim();
         }
 
         dropdown?.classList.add('hidden');
@@ -2330,7 +2383,8 @@
       formalidadValue = templateFormalidad === 'tu' || templateFormalidad === 'usted' ? templateFormalidad : 'auto';
       if (trigger) {
         const labels = { auto: 'Automático', tu: 'Tú', usted: 'Usted' };
-        trigger.childNodes[0].nodeValue = `${labels[formalidadValue] || 'Automático'} `;
+        const triggerLabel = trigger.querySelector('.formalidad-label');
+        if (triggerLabel) triggerLabel.textContent = labels[formalidadValue] || 'Automático';
       }
       updateRecipientRegionSelection(data.recipientRegion || '');
       setMode(data.mode || 'compose');
