@@ -367,7 +367,7 @@
       resize: none;
       line-height: 1.5;
       padding: 20px;
-      padding-bottom: 48px;
+      padding-bottom: 44px;
       border-radius: 12px;
       transition: height 0.15s ease,
                   box-shadow 0.2s ease;
@@ -428,48 +428,67 @@
 
     .formalidad-trigger {
       position: absolute;
-      right: 12px;
-      bottom: 10px;
-      display: flex;
+      right: 14px;
+      bottom: 12px;
+
+      display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
+
       font-size: 13px;
-      color: #444;
+      font-weight: 400;
+
+      color: #6b6b6b;
       background: transparent;
       border: none;
+      padding: 2px 6px;
+      border-radius: 6px;
+
       cursor: pointer;
-      padding: 6px 8px;
-      border-radius: 8px;
-      transition: background 0.2s ease;
+      transition: all 0.15s ease;
       z-index: 3;
     }
 
     .formalidad-trigger:hover {
-      background: #fafaf9;
+      background: #f3f3f3;
+      color: #111;
+    }
+
+    .formalidad-trigger:focus {
+      outline: none;
+      box-shadow: none;
+    }
+
+    .formalidad-trigger i {
+      width: 14px;
+      height: 14px;
+      opacity: 0.6;
     }
 
     .formalidad-dropdown {
       position: absolute;
-      right: 12px;
-      top: calc(100% + 6px);
-      bottom: auto;
-      background: white;
-      border: 1px solid #e5e5e5;
-      border-radius: 12px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      top: calc(100% + 8px);
+      right: 0;
+
+      background: #ffffff;
+      border: 1px solid #e7e7e7;
+      border-radius: 10px;
+
+      box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+
       padding: 6px;
-      min-width: 180px;
+      min-width: 190px;
+
       display: flex;
       flex-direction: column;
-      animation: fadeUp 0.18s ease;
+      animation: fadeUp 0.14s ease;
       z-index: 4;
     }
 
     .formalidad-tooltip {
       position: absolute;
-      right: 12px;
-      top: calc(100% + 34px);
-      bottom: auto;
+      bottom: 34px;
+      right: 0;
       background: #2b2b2b;
       color: white;
       font-size: 12px;
@@ -501,10 +520,10 @@
       background: none;
       border: none;
       text-align: left;
-      padding: 8px 10px;
-      border-radius: 8px;
+      padding: 7px 10px;
+      border-radius: 7px;
       cursor: pointer;
-      font-size: 14px;
+      font-size: 13px;
     }
 
     .formalidad-dropdown i {
@@ -514,7 +533,7 @@
     }
 
     .formalidad-dropdown button:hover {
-      background: #f5f5f4;
+      background: #f5f5f5;
     }
 
     .hidden {
