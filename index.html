@@ -367,7 +367,7 @@
       resize: none;
       line-height: 1.5;
       padding: 20px;
-      padding-bottom: 44px;
+      padding-bottom: 48px;
       border-radius: 12px;
       transition: height 0.15s ease,
                   box-shadow 0.2s ease;
@@ -426,9 +426,8 @@
       z-index: 1;
     }
 
-    .formalidad-trigger {
+    .editor-control {
       position: absolute;
-      right: 14px;
       bottom: 12px;
 
       display: inline-flex;
@@ -449,20 +448,28 @@
       z-index: 3;
     }
 
-    .formalidad-trigger:hover {
+    .editor-control:hover {
       background: #f3f3f3;
       color: #111;
     }
 
-    .formalidad-trigger:focus {
+    .editor-control:focus {
       outline: none;
       box-shadow: none;
     }
 
-    .formalidad-trigger i {
+    .editor-control i {
       width: 14px;
       height: 14px;
       opacity: 0.6;
+    }
+
+    #formalidadTrigger {
+      right: 14px;
+    }
+
+    #versionsButton {
+      right: 120px;
     }
 
     .formalidad-dropdown {
@@ -801,7 +808,6 @@
     }
 
     .versions-control {
-      min-width: 110px;
       position: relative;
     }
 
@@ -1860,10 +1866,21 @@
                 aria-label="Describe brevemente el email que deseas generar"
               ></textarea>
 
-              <button id="formalidadTrigger" class="formalidad-trigger" type="button">
+              <button id="formalidadTrigger" class="editor-control" type="button">
                 <span id="formalidadLabel">Automático</span>
                 <i data-lucide="chevron-down"></i>
               </button>
+
+              <div class="versions-control strategy-dropdown">
+                <button id="versionsButton" class="editor-control" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="versionsMenu">
+                  <span id="versionsLabel">1 versión</span>
+                  <i data-lucide="chevron-down"></i>
+                </button>
+                <ul class="strategy-menu versions-menu" id="versionsMenu" role="menu" aria-label="Cantidad de versiones">
+                  <li role="none"><button class="strategy-option versions-option selected" type="button" role="menuitemradio" aria-checked="true" data-value="1">1</button></li>
+                  <li role="none"><button class="strategy-option versions-option" type="button" role="menuitemradio" aria-checked="false" data-value="3">+2</button></li>
+                </ul>
+              </div>
 
               <div id="formalidadTooltip" class="formalidad-tooltip hidden">
                 Formalidad
@@ -1926,16 +1943,6 @@
                 <span id="buttonText">Generar</span>
               </span>
             </button>
-            <div class="versions-control strategy-dropdown">
-              <button class="strategy-btn" id="versionsButton" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="versionsMenu">
-                <span class="strategy-title">Variantes</span>
-                <span class="strategy-subtitle" id="versionsSubtitle" data-role="selected-value">1</span>
-              </button>
-              <ul class="strategy-menu versions-menu" id="versionsMenu" role="menu" aria-label="Cantidad de versiones">
-                <li role="none"><button class="strategy-option versions-option selected" type="button" role="menuitemradio" aria-checked="true" data-value="1">1</button></li>
-                <li role="none"><button class="strategy-option versions-option" type="button" role="menuitemradio" aria-checked="false" data-value="3">+2</button></li>
-              </ul>
-            </div>
           </div>
         </div>
       </div>
@@ -1991,7 +1998,7 @@
     const buttonText = document.getElementById('buttonText');
     const versionsControl = document.querySelector('.versions-control');
     const versionsButton = document.getElementById('versionsButton');
-    const versionsSubtitle = document.getElementById('versionsSubtitle');
+    const versionsLabel = document.getElementById('versionsLabel');
     const versionsMenu = document.getElementById('versionsMenu');
     const versionsOptions = Array.from(document.querySelectorAll('.versions-option'));
     const charCount = document.getElementById('charCount');
@@ -2310,7 +2317,7 @@
       if (!selectedValue) return;
 
       selectedVersions = selectedValue;
-      versionsSubtitle.textContent = selectedVersions === 3 ? '+2' : '1';
+      versionsLabel.textContent = selectedVersions === 3 ? '3 versiones' : '1 versión';
       versionsOptions.forEach((opt) => {
         const selected = opt === optionButton;
         opt.classList.toggle('selected', selected);
