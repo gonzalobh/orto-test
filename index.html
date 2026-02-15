@@ -243,6 +243,31 @@
       font-weight: 600;
     }
 
+    .custom-select-menu hr {
+      border: 0;
+      border-top: 1px solid var(--border-color);
+      margin: 0.25rem;
+    }
+
+    .template-manage-btn {
+      width: 100%;
+      background: transparent;
+      border: none;
+      border-radius: 6px;
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+      color: var(--text-secondary);
+      font-size: 0.75rem;
+      cursor: pointer;
+    }
+
+    .template-manage-btn:hover,
+    .template-manage-btn:focus-visible {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      outline: none;
+    }
+
     .mode-toggle {
       display: inline-flex;
       align-items: center;
@@ -344,6 +369,24 @@
 
     .instruction-field {
       position: relative;
+    }
+
+    .instruction-footer {
+      margin-top: 0.5rem;
+      display: flex;
+      justify-content: flex-start;
+    }
+
+    .template-save-btn {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      opacity: 0.6;
+      padding: 4px 8px;
+    }
+
+    .template-save-btn:hover,
+    .template-save-btn:focus-visible {
+      opacity: 0.9;
     }
 
     .instruction-hint {
@@ -1589,6 +1632,73 @@
     }
 
 
+
+    .template-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1500;
+      padding: 1rem;
+    }
+
+    .template-modal {
+      width: min(760px, 100%);
+      max-height: 80vh;
+      overflow-y: auto;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-primary);
+      box-shadow: var(--shadow-lg);
+      padding: 1rem;
+    }
+
+    .template-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .template-list {
+      display: grid;
+      gap: 0.5rem;
+    }
+
+    .template-row {
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 0.625rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .template-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.375rem;
+    }
+
+    .template-action-btn {
+      border: 1px solid var(--border-color);
+      background: var(--bg-secondary);
+      border-radius: 8px;
+      padding: 0.35rem 0.55rem;
+      font-size: 0.75rem;
+      cursor: pointer;
+    }
+
+    .template-action-btn:hover,
+    .template-action-btn:focus-visible {
+      border-color: var(--text-secondary);
+      outline: none;
+    }
+
     @media (max-width: 640px) {
       .input-pair {
         flex-direction: column;
@@ -1619,6 +1729,14 @@
       </div>
 
       <div class="controls-right">
+        <div class="custom-select-wrapper">
+          <button class="custom-select-btn" id="templatesBtn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span>Planillas</span>
+            <i data-lucide="chevron-down" class="select-arrow"></i>
+          </button>
+          <div class="custom-select-menu" id="templatesMenu" role="menu" hidden></div>
+        </div>
+
         <div class="custom-select-wrapper">
           <button class="custom-select-btn" id="recipientRegionBtn" type="button" aria-haspopup="true" aria-expanded="false">
             <span id="recipientRegionText">No especificada</span>
@@ -1659,6 +1777,9 @@
                 aria-label="Describe brevemente el email que deseas generar"
               ></textarea>
               <div class="instruction-hint" aria-hidden="true"></div>
+              <div class="instruction-footer">
+                <button id="saveTemplateBtn" class="icon-btn template-save-btn" type="button">Guardar como planilla</button>
+              </div>
             </div>
             <div class="char-counter">
               <span id="charCount">0</span>/300
@@ -1788,6 +1909,10 @@
     const strategyButtons = Array.from(document.querySelectorAll('.strategy-btn:not(#versionsButton)'));
     const strategyMenus = Array.from(document.querySelectorAll('.strategy-menu:not(#versionsMenu)'));
     const modeButtons = Array.from(document.querySelectorAll('.mode-toggle-btn'));
+    const templatesBtn = document.getElementById('templatesBtn');
+    const templatesMenu = document.getElementById('templatesMenu');
+    const saveTemplateBtn = document.getElementById('saveTemplateBtn');
+    const TEMPLATE_KEY = 'redactar_templates';
     const SELECTION_MIN_LENGTH = 3;
 
     let currentMode = 'compose';
@@ -2167,6 +2292,200 @@
       setActiveOutputTab('new');
       tabNewBtn?.addEventListener('click', () => setActiveOutputTab('new'));
       tabHistoryBtn?.addEventListener('click', () => setActiveOutputTab('history'));
+    }
+
+
+    function loadTemplates() {
+      return JSON.parse(localStorage.getItem(TEMPLATE_KEY) || '[]');
+    }
+
+    function saveTemplates(list) {
+      localStorage.setItem(TEMPLATE_KEY, JSON.stringify(list));
+    }
+
+    function getCurrentFormData() {
+      return {
+        instruction: document.getElementById('instruction').value,
+        senderName: document.getElementById('senderName').value,
+        senderRole: document.getElementById('senderRole').value,
+        clientName: document.getElementById('clientName').value,
+        clientRole: document.getElementById('clientRole').value,
+        formality: document.getElementById('formalityPreference').value,
+        recipientRegion: document.getElementById('recipientRegion').value,
+        mode: document.querySelector('.mode-toggle-btn.active')?.dataset.mode || 'compose'
+      };
+    }
+
+    function updateRecipientRegionSelection(value) {
+      const nextValue = value || '';
+      const recipientRegionInput = document.getElementById('recipientRegion');
+      const recipientRegionText = document.getElementById('recipientRegionText');
+      const recipientRegionMenu = document.getElementById('recipientRegionMenu');
+      const options = recipientRegionMenu?.querySelectorAll('.custom-select-option') || [];
+      let selectedText = 'No especificada';
+
+      options.forEach((option) => {
+        const selected = option.dataset.value === nextValue;
+        if (selected) {
+          selectedText = option.textContent || selectedText;
+        }
+        option.classList.toggle('selected', selected);
+        option.setAttribute('aria-checked', selected ? 'true' : 'false');
+      });
+
+      if (recipientRegionInput) recipientRegionInput.value = nextValue;
+      if (recipientRegionText) recipientRegionText.textContent = selectedText;
+    }
+
+    function applyTemplate(data) {
+      if (!data) return;
+      instructionEl.value = data.instruction || '';
+      senderNameEl.value = data.senderName || '';
+      senderRoleEl.value = data.senderRole || '';
+      clientNameEl.value = data.clientName || '';
+      recipientRoleEl.value = data.clientRole || '';
+      setFormalityPreference(data.formality || 'auto');
+      updateRecipientRegionSelection(data.recipientRegion || '');
+      setMode(data.mode || 'compose');
+
+      [instructionEl, senderNameEl, senderRoleEl, clientNameEl, recipientRoleEl, originalEmailEl].forEach((el) => {
+        el?.dispatchEvent(new Event('input', { bubbles: true }));
+      });
+      charCount.textContent = instructionEl.value.length;
+      updatePreviewIfEmpty();
+      closeTemplatesMenu();
+    }
+
+    function deleteTemplate(id) {
+      const list = loadTemplates().filter((t) => t.id !== id);
+      saveTemplates(list);
+      renderTemplateMenu();
+      renderTemplateManagerRows();
+    }
+
+    function openManagerModal() {
+      const overlay = document.createElement('div');
+      overlay.className = 'template-modal-overlay';
+      overlay.innerHTML = `
+        <div class="template-modal" role="dialog" aria-modal="true" aria-label="Gestionar planillas">
+          <div class="template-modal-header">
+            <strong>Gestionar planillas</strong>
+            <button class="icon-btn" type="button" data-action="close-manager">Cerrar</button>
+          </div>
+          <div class="template-list" id="templateManagerList"></div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+
+      overlay.addEventListener('click', (event) => {
+        if (event.target === overlay || event.target.closest('[data-action="close-manager"]')) {
+          overlay.remove();
+        }
+      });
+
+      renderTemplateManagerRows();
+    }
+
+    function renderTemplateManagerRows() {
+      const container = document.getElementById('templateManagerList');
+      if (!container) return;
+      const templates = loadTemplates();
+      if (!templates.length) {
+        container.innerHTML = '<div class="output-empty">No hay planillas guardadas.</div>';
+        return;
+      }
+
+      container.innerHTML = '';
+      templates.forEach((t) => {
+        const row = document.createElement('div');
+        row.className = 'template-row';
+
+        const name = document.createElement('div');
+        name.textContent = t.name;
+
+        const actions = document.createElement('div');
+        actions.className = 'template-actions';
+
+        const loadBtn = document.createElement('button');
+        loadBtn.className = 'template-action-btn';
+        loadBtn.textContent = 'Cargar';
+        loadBtn.onclick = () => applyTemplate(t.data);
+
+        const renameBtn = document.createElement('button');
+        renameBtn.className = 'template-action-btn';
+        renameBtn.textContent = 'Renombrar';
+        renameBtn.onclick = () => {
+          const nextName = window.prompt('Nuevo nombre de la planilla:', t.name);
+          if (!nextName) return;
+          const list = loadTemplates().map((item) => item.id === t.id ? { ...item, name: nextName } : item);
+          saveTemplates(list);
+          renderTemplateMenu();
+          renderTemplateManagerRows();
+        };
+
+        const replaceBtn = document.createElement('button');
+        replaceBtn.className = 'template-action-btn';
+        replaceBtn.textContent = 'Reemplazar con actual';
+        replaceBtn.onclick = () => {
+          const list = loadTemplates().map((item) => item.id === t.id ? { ...item, data: getCurrentFormData() } : item);
+          saveTemplates(list);
+          renderTemplateMenu();
+          renderTemplateManagerRows();
+        };
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'template-action-btn';
+        deleteBtn.textContent = 'Eliminar';
+        deleteBtn.onclick = () => {
+          if (!window.confirm(`¿Eliminar planilla "${t.name}"?`)) return;
+          deleteTemplate(t.id);
+        };
+
+        actions.append(loadBtn, renameBtn, replaceBtn, deleteBtn);
+        row.append(name, actions);
+        container.appendChild(row);
+      });
+    }
+
+    function renderTemplateMenu() {
+      if (!templatesMenu) return;
+      const list = loadTemplates();
+      templatesMenu.innerHTML = '';
+
+      list.forEach((t) => {
+        const btn = document.createElement('button');
+        btn.className = 'custom-select-option';
+        btn.textContent = t.name;
+        btn.type = 'button';
+        btn.onclick = () => applyTemplate(t.data);
+        templatesMenu.appendChild(btn);
+      });
+
+      const divider = document.createElement('hr');
+      const manage = document.createElement('button');
+      manage.className = 'template-manage-btn';
+      manage.type = 'button';
+      manage.textContent = 'Gestionar planillas…';
+      manage.onclick = () => {
+        closeTemplatesMenu();
+        openManagerModal();
+      };
+
+      templatesMenu.appendChild(divider);
+      templatesMenu.appendChild(manage);
+    }
+
+    function closeTemplatesMenu() {
+      if (!templatesBtn || !templatesMenu) return;
+      templatesBtn.setAttribute('aria-expanded', 'false');
+      templatesMenu.hidden = true;
+    }
+
+    function toggleTemplatesMenu() {
+      if (!templatesBtn || !templatesMenu) return;
+      const isExpanded = templatesBtn.getAttribute('aria-expanded') === 'true';
+      templatesBtn.setAttribute('aria-expanded', isExpanded ? 'false' : 'true');
+      templatesMenu.hidden = isExpanded;
     }
 
     function createHistoryId() {
@@ -3236,6 +3555,29 @@ ${body}`.trim();
       });
     });
 
+    saveTemplateBtn?.addEventListener('click', () => {
+      const name = window.prompt('Nombre de la planilla:');
+      if (!name) return;
+
+      const templates = loadTemplates();
+      templates.push({
+        id: typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+          ? crypto.randomUUID()
+          : createHistoryId(),
+        name,
+        createdAt: Date.now(),
+        data: getCurrentFormData()
+      });
+
+      saveTemplates(templates);
+      renderTemplateMenu();
+    });
+
+    templatesBtn?.addEventListener('click', (event) => {
+      event.stopPropagation();
+      toggleTemplatesMenu();
+    });
+
     historyListEl?.addEventListener('keydown', (event) => {
       const item = event.target.closest('.history-item');
       if (!item) return;
@@ -3256,6 +3598,9 @@ ${body}`.trim();
 
       if (!event.target.closest('.translate-dropdown')) {
         closeAllTranslateMenus();
+      }
+      if (!event.target.closest('#templatesBtn') && !event.target.closest('#templatesMenu')) {
+        closeTemplatesMenu();
       }
       if (!event.target.closest('.strategy-dropdown')) {
         closeAllStrategyMenus();
@@ -3286,6 +3631,7 @@ ${body}`.trim();
       if (event.key === 'Escape') {
         closeAllStrategyMenus();
         closeVersionsMenu();
+        closeTemplatesMenu();
         hideSelectionPopover();
       }
     });
@@ -3304,8 +3650,13 @@ ${body}`.trim();
     startInstructionHint();
     setMode('compose');
     initOutputTabs();
+    renderTemplateMenu();
     renderEmptyState(); // Inicializar con el estado vacío mejorado
     updateGenerateButtonState();
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderTemplateMenu();
+    });
   </script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script>
