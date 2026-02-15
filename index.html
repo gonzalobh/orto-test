@@ -367,26 +367,35 @@
                   box-shadow 0.2s ease;
     }
 
+    .instruction-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+    }
+
     .instruction-field {
       position: relative;
     }
 
-    .instruction-footer {
-      margin-top: 0.5rem;
-      display: flex;
-      justify-content: flex-start;
-    }
-
-    .template-save-btn {
-      font-size: 0.75rem;
+    .save-template-floating {
+      position: absolute;
+      right: 10px;
+      bottom: 10px;
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      background: #ffffff;
+      border: 1px solid var(--border-color);
       color: var(--text-secondary);
-      opacity: 0.6;
-      padding: 4px 8px;
+      cursor: pointer;
+      transition: all .15s ease;
+      box-shadow: var(--shadow-sm);
     }
 
-    .template-save-btn:hover,
-    .template-save-btn:focus-visible {
-      opacity: 0.9;
+    .save-template-floating:hover {
+      color: var(--text-primary);
+      border-color: var(--text-primary);
     }
 
     .instruction-hint {
@@ -1730,14 +1739,6 @@
 
       <div class="controls-right">
         <div class="custom-select-wrapper">
-          <button class="custom-select-btn" id="templatesBtn" type="button" aria-haspopup="true" aria-expanded="false">
-            <span>Planillas</span>
-            <i data-lucide="chevron-down" class="select-arrow"></i>
-          </button>
-          <div class="custom-select-menu" id="templatesMenu" role="menu" hidden></div>
-        </div>
-
-        <div class="custom-select-wrapper">
           <button class="custom-select-btn" id="recipientRegionBtn" type="button" aria-haspopup="true" aria-expanded="false">
             <span id="recipientRegionText">No especificada</span>
             <i data-lucide="chevron-down" class="select-arrow"></i>
@@ -1769,17 +1770,28 @@
           </div>
 
           <div class="input-group">
-            <label class="input-label" for="instruction">¿Qué quieres comunicar?</label>
+            <div class="instruction-header">
+              <label class="input-label" for="instruction">¿Qué quieres comunicar?</label>
+
+              <button id="templatesBtn" class="icon-btn" type="button" aria-haspopup="true" aria-expanded="false">
+                <i data-lucide="folder"></i>
+                Planillas
+              </button>
+              <div class="custom-select-menu" id="templatesMenu" role="menu" hidden></div>
+            </div>
             <div class="instruction-field">
               <textarea
                 id="instruction"
                 maxlength="300"
                 aria-label="Describe brevemente el email que deseas generar"
               ></textarea>
+              <button id="saveTemplateFloating"
+                class="save-template-floating"
+                type="button"
+                hidden>
+                Guardar como plantilla
+              </button>
               <div class="instruction-hint" aria-hidden="true"></div>
-              <div class="instruction-footer">
-                <button id="saveTemplateBtn" class="icon-btn template-save-btn" type="button">Guardar como planilla</button>
-              </div>
             </div>
             <div class="char-counter">
               <span id="charCount">0</span>/300
@@ -1911,8 +1923,8 @@
     const modeButtons = Array.from(document.querySelectorAll('.mode-toggle-btn'));
     const templatesBtn = document.getElementById('templatesBtn');
     const templatesMenu = document.getElementById('templatesMenu');
-    const saveTemplateBtn = document.getElementById('saveTemplateBtn');
-    const TEMPLATE_KEY = 'redactar_templates';
+    const saveBtn = document.getElementById('saveTemplateFloating');
+    const TEMPLATE_KEY = 'redactar_templates_v1';
     const SELECTION_MIN_LENGTH = 3;
 
     let currentMode = 'compose';
@@ -2314,6 +2326,14 @@
         recipientRegion: document.getElementById('recipientRegion').value,
         mode: document.querySelector('.mode-toggle-btn.active')?.dataset.mode || 'compose'
       };
+    }
+
+    function templateExists(instruction) {
+      const templates = loadTemplates();
+
+      return templates.some((t) =>
+        (t.data?.instruction || '').trim().toLowerCase() === instruction.trim().toLowerCase()
+      );
     }
 
     function updateRecipientRegionSelection(value) {
@@ -3555,22 +3575,41 @@ ${body}`.trim();
       });
     });
 
-    saveTemplateBtn?.addEventListener('click', () => {
-      const name = window.prompt('Nombre de la planilla:');
+    instructionEl.addEventListener('input', () => {
+      const value = instructionEl.value.trim();
+
+      if (!value) {
+        saveBtn.hidden = true;
+        return;
+      }
+
+      if (templateExists(value)) {
+        saveBtn.hidden = true;
+        return;
+      }
+
+      saveBtn.hidden = false;
+    });
+
+    saveBtn?.addEventListener('click', () => {
+      const name = window.prompt('Nombre de la plantilla:');
       if (!name) return;
 
-      const templates = loadTemplates();
-      templates.push({
+      const newTemplate = {
         id: typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
           ? crypto.randomUUID()
           : createHistoryId(),
         name,
         createdAt: Date.now(),
         data: getCurrentFormData()
-      });
+      };
 
-      saveTemplates(templates);
+      const list = loadTemplates();
+      list.push(newTemplate);
+      saveTemplates(list);
       renderTemplateMenu();
+
+      saveBtn.hidden = true;
     });
 
     templatesBtn?.addEventListener('click', (event) => {
