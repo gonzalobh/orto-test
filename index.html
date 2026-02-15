@@ -394,11 +394,14 @@
       transition: opacity .25s ease, background-color .15s ease, transform .25s ease;
       opacity: 0;
       transform: translateY(4px);
+      z-index: 6;
+      pointer-events: none;
     }
 
     .save-template-floating.visible {
       opacity: 1;
       transform: translateY(0);
+      pointer-events: auto;
     }
 
     .save-template-floating:hover {
