@@ -367,7 +367,7 @@
       resize: none;
       line-height: 1.5;
       padding: 20px;
-      padding-bottom: 48px;
+      padding-bottom: 52px;
       border-radius: 12px;
       transition: height 0.15s ease,
                   box-shadow 0.2s ease;
@@ -465,11 +465,40 @@
     }
 
     #formalidadTrigger {
-      right: 14px;
+      right: 54px;
     }
 
     #versionsButton {
-      right: 120px;
+      right: 170px;
+    }
+
+    .generate-inline {
+      position: absolute;
+      right: 14px;
+      bottom: 10px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #e5e5e5;
+      color: #9a9a9a;
+      cursor: default;
+      transition: all 0.18s ease;
+      z-index: 3;
+    }
+
+    .generate-inline i {
+      width: 14px;
+      height: 14px;
+    }
+
+    .generate-inline.active {
+      background: #111;
+      color: #fff;
+      cursor: pointer;
     }
 
     .formalidad-dropdown {
@@ -794,85 +823,9 @@
       font-variant-numeric: tabular-nums;
     }
 
-    /* Botón generate */
-
-
-    .generate-row {
-      display: flex;
-      align-items: stretch;
-      gap: 0.625rem;
-    }
-
-    .generate-row .generate-btn {
-      flex: 1;
-    }
-
-    .versions-control {
-      position: relative;
-    }
-
     .versions-menu {
       right: 0;
       left: auto;
-    }
-
-    .generate-btn {
-      width: 100%;
-      background: var(--accent-color);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      padding: 0.875rem 1.5rem;
-      font-family: inherit;
-      font-size: 0.9375rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.15s ease;
-      letter-spacing: -0.01em;
-    }
-
-    .generate-btn:hover:not(:disabled) {
-      background: #404040;
-      transform: translateY(-1px);
-      box-shadow: var(--shadow-md);
-    }
-
-    .generate-btn:active:not(:disabled) {
-      transform: translateY(0);
-    }
-
-    .generate-btn:disabled {
-      background: #1d1d1f26;
-      color: #ffffff;
-      opacity: 1;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    .btn-content {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-    }
-
-    .spinner {
-      width: 14px;
-      height: 14px;
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      border-top-color: var(--bg-secondary);
-      border-radius: 50%;
-      animation: spin 0.6s linear infinite;
-      display: none;
-    }
-
-    /* Mostrar spinner solo cuando está generando (no cuando está disabled por falta de texto) */
-    .generate-btn.generating .spinner {
-      display: block;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
     }
 
     /* Panel derecho limpio */
@@ -1866,11 +1819,6 @@
                 aria-label="Describe brevemente el email que deseas generar"
               ></textarea>
 
-              <button id="formalidadTrigger" class="editor-control" type="button">
-                <span id="formalidadLabel">Automático</span>
-                <i data-lucide="chevron-down"></i>
-              </button>
-
               <div class="versions-control strategy-dropdown">
                 <button id="versionsButton" class="editor-control" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="versionsMenu">
                   <span id="versionsLabel">1 versión</span>
@@ -1881,6 +1829,15 @@
                   <li role="none"><button class="strategy-option versions-option" type="button" role="menuitemradio" aria-checked="false" data-value="3">+2</button></li>
                 </ul>
               </div>
+
+              <button id="formalidadTrigger" class="editor-control" type="button">
+                <span id="formalidadLabel">Automático</span>
+                <i data-lucide="chevron-down"></i>
+              </button>
+
+              <button id="generateButton" class="generate-inline" type="button" disabled>
+                <i data-lucide="arrow-up"></i>
+              </button>
 
               <div id="formalidadTooltip" class="formalidad-tooltip hidden">
                 Formalidad
@@ -1936,14 +1893,6 @@
 
           </div>
 
-          <div class="generate-row">
-            <button class="generate-btn" id="generateButton" type="button">
-              <span class="btn-content">
-                <span class="spinner"></span>
-                <span id="buttonText">Generar</span>
-              </span>
-            </button>
-          </div>
         </div>
       </div>
 
@@ -1995,7 +1944,6 @@
     const historyListEl = document.getElementById('historyList');
     const clearHistoryBtn = document.getElementById('clearHistoryBtn');
     const generateButton = document.getElementById('generateButton');
-    const buttonText = document.getElementById('buttonText');
     const versionsControl = document.querySelector('.versions-control');
     const versionsButton = document.getElementById('versionsButton');
     const versionsLabel = document.getElementById('versionsLabel');
@@ -2138,12 +2086,7 @@
 
     function shouldDisableGenerateButton() {
       const instruction = instructionEl?.value.trim() || '';
-      const originalEmail = originalEmailEl?.value.trim() || '';
-      const isReplyMode = currentMode === 'reply';
-
-      if (!instruction) return true;
-      if (isReplyMode && !originalEmail) return true;
-      return false;
+      return !instruction;
     }
 
     function updateGenerateButtonState() {
@@ -2151,10 +2094,13 @@
 
       if (isGenerating) {
         generateButton.disabled = true;
+        generateButton.classList.remove('active');
         return;
       }
 
+      const hasText = (instructionEl?.value || '').trim().length > 0;
       generateButton.disabled = shouldDisableGenerateButton();
+      generateButton.classList.toggle('active', hasText);
     }
 
 
@@ -3518,9 +3464,7 @@ ${body}`.trim();
 
       isGenerating = true;
       generateButton.disabled = true;
-      generateButton.classList.add('generating');
       versionsButton.disabled = true;
-      buttonText.textContent = 'Generando...';
       const loadingSub = (selectedVersions === 3)
         ? 'Generando +2 variantes profesionales'
         : 'Generando email profesional';
@@ -3582,15 +3526,14 @@ ${body}`.trim();
         renderPlaceholder('Error de conexión.');
       } finally {
         isGenerating = false;
-        generateButton.classList.remove('generating');
         versionsButton.disabled = false;
-        buttonText.textContent = 'Generar';
         updateGenerateButtonState();
       }
     }
 
 
     generateButton.addEventListener('click', () => {
+      if (generateButton.disabled) return;
       generateEmail();
     });
     outputEl.addEventListener('click', handleOutputClick);
