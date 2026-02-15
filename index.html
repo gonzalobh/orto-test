@@ -451,7 +451,8 @@
     .formalidad-dropdown {
       position: absolute;
       right: 12px;
-      bottom: 44px;
+      top: calc(100% + 6px);
+      bottom: auto;
       background: white;
       border: 1px solid #e5e5e5;
       border-radius: 12px;
@@ -467,7 +468,8 @@
     .formalidad-tooltip {
       position: absolute;
       right: 12px;
-      bottom: 64px;
+      top: calc(100% + 34px);
+      bottom: auto;
       background: #2b2b2b;
       color: white;
       font-size: 12px;
@@ -493,6 +495,9 @@
     }
 
     .formalidad-dropdown button {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       background: none;
       border: none;
       text-align: left;
@@ -500,6 +505,12 @@
       border-radius: 8px;
       cursor: pointer;
       font-size: 14px;
+    }
+
+    .formalidad-dropdown i {
+      width: 16px;
+      height: 16px;
+      opacity: 0.7;
     }
 
     .formalidad-dropdown button:hover {
@@ -1831,7 +1842,7 @@
               ></textarea>
 
               <button id="formalidadTrigger" class="formalidad-trigger" type="button">
-                <span class="formalidad-label">Formalidad</span>
+                <span id="formalidadLabel">Automático</span>
                 <i data-lucide="chevron-down"></i>
               </button>
 
@@ -1840,9 +1851,9 @@
               </div>
 
               <div id="formalidadDropdown" class="formalidad-dropdown hidden">
-                <button type="button" data-value="auto">Automático</button>
-                <button type="button" data-value="tu">Tú (cercano)</button>
-                <button type="button" data-value="usted">Usted (formal)</button>
+                <button type="button" data-value="auto"><span>Automático</span><i class="check hidden" data-lucide="check"></i></button>
+                <button type="button" data-value="tu"><span>Tú (cercano)</span><i class="check hidden" data-lucide="check"></i></button>
+                <button type="button" data-value="usted"><span>Usted (formal)</span><i class="check hidden" data-lucide="check"></i></button>
               </div>
 
               <button id="saveTemplateFloating"
@@ -1974,6 +1985,7 @@
     const saveBtn = document.getElementById('saveTemplateFloating');
     const TEMPLATE_KEY = 'redactar_templates_v1';
     const SELECTION_MIN_LENGTH = 3;
+    const STORAGE_KEY = 'formalidadPreference';
 
     let currentMode = 'compose';
     let selectedVersions = 1;
@@ -1991,7 +2003,10 @@
     let instructionHintResumeTimer = null;
     let instructionHintTransitionTimer = null;
     let instructionHintTypingTimer = null;
-    let formalidadValue = 'auto';
+    let formalidadValue = localStorage.getItem(STORAGE_KEY) || 'auto';
+    if (!['auto', 'tu', 'usted'].includes(formalidadValue)) {
+      formalidadValue = 'auto';
+    }
     let tooltipTimeout;
     let tooltipHideTimeout;
 
@@ -2022,6 +2037,35 @@
         .trim();
     }
 
+    const label = document.getElementById('formalidadLabel');
+    const options = dropdown?.querySelectorAll('button') || [];
+
+    const labels = {
+      auto: 'Automático',
+      tu: 'Tú (cercano)',
+      usted: 'Usted (formal)'
+    };
+
+    localStorage.setItem(STORAGE_KEY, formalidadValue);
+
+    if (label) {
+      label.textContent = labels[formalidadValue] || labels.auto;
+    }
+
+    function updateChecks() {
+      options.forEach((btn) => {
+        const icon = btn.querySelector('.check');
+        if (!icon) return;
+        if (btn.dataset.value === formalidadValue) {
+          icon.classList.remove('hidden');
+        } else {
+          icon.classList.add('hidden');
+        }
+      });
+    }
+
+    updateChecks();
+
     trigger?.addEventListener('click', () => {
       dropdown?.classList.toggle('hidden');
     });
@@ -2044,15 +2088,17 @@
       tooltipHideTimeout = setTimeout(() => tooltip.classList.add('hidden'), 120);
     });
 
-    dropdown?.querySelectorAll('button').forEach((btn) => {
+    options.forEach((btn) => {
       btn.addEventListener('click', () => {
         formalidadValue = btn.dataset.value || 'auto';
 
-        if (trigger) {
-          const triggerLabel = trigger.querySelector('.formalidad-label');
-          if (triggerLabel) triggerLabel.textContent = btn.innerText.split('(')[0].trim();
+        localStorage.setItem(STORAGE_KEY, formalidadValue);
+
+        if (label) {
+          label.textContent = labels[formalidadValue] || labels.auto;
         }
 
+        updateChecks();
         dropdown?.classList.add('hidden');
       });
     });
@@ -2381,11 +2427,11 @@
       recipientRoleEl.value = data.clientRole || '';
       const templateFormalidad = data.formalidad ?? data.formality;
       formalidadValue = templateFormalidad === 'tu' || templateFormalidad === 'usted' ? templateFormalidad : 'auto';
-      if (trigger) {
-        const labels = { auto: 'Automático', tu: 'Tú', usted: 'Usted' };
-        const triggerLabel = trigger.querySelector('.formalidad-label');
-        if (triggerLabel) triggerLabel.textContent = labels[formalidadValue] || 'Automático';
+      localStorage.setItem(STORAGE_KEY, formalidadValue);
+      if (label) {
+        label.textContent = labels[formalidadValue] || labels.auto;
       }
+      updateChecks();
       updateRecipientRegionSelection(data.recipientRegion || '');
       setMode(data.mode || 'compose');
 
