@@ -367,7 +367,6 @@
       resize: none;
       line-height: 1.5;
       padding: 20px;
-      padding-left: 90px;
       padding-bottom: 52px;
       border-radius: 12px;
       transition: height 0.15s ease,
@@ -381,23 +380,30 @@
       position: relative;
     }
 
-    #saveTemplateFloating {
+    .save-template-floating {
       position: absolute;
-      left: 14px;
-      bottom: 12px;
-      font-size: 13px;
-      color: #6b6b6b;
+      left: 10px;
+      bottom: 10px;
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 8px;
       background: transparent;
       border: none;
-      padding: 2px 6px;
-      border-radius: 6px;
+      color: var(--text-secondary);
       cursor: pointer;
-      transition: all 0.15s ease;
+      transition: opacity .25s ease, background-color .15s ease, transform .25s ease;
+      opacity: 0;
+      transform: translateY(4px);
     }
 
-    #saveTemplateFloating:hover {
-      background: #f3f3f3;
-      color: #111;
+    .save-template-floating.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .save-template-floating:hover {
+      background-color: #fafaf9;
+      color: var(--text-primary);
     }
 
     .instruction-hint {
@@ -1844,6 +1850,7 @@
               </div>
 
               <button id="saveTemplateFloating"
+                class="save-template-floating"
                 type="button">
                 Guardar como plantilla
               </button>
@@ -2651,7 +2658,6 @@
       if (typeof entry.instruction === 'string') {
         instructionEl.value = entry.instruction;
         charCount.textContent = instructionEl.value.length;
-        updateSaveTemplateFloatingVisibility();
         updatePreviewIfEmpty();
       }
     }
@@ -3542,7 +3548,6 @@ ${body}`.trim();
         stopInstructionHint();
         instructionEl.focus();
         charCount.textContent = instructionEl.value.length;
-        updateSaveTemplateFloatingVisibility();
         updatePreviewIfEmpty();
       }
     });
@@ -3585,23 +3590,26 @@ ${body}`.trim();
       return text.trim().split(/\s+/).filter(Boolean).length;
     }
 
-    function updateSaveTemplateFloatingVisibility() {
-      if (!saveBtn) return;
-
+    instructionEl.addEventListener('input', () => {
       const value = instructionEl.value.trim();
-      if (!value || countWords(value) < 3 || templateExists(value)) {
-        saveBtn.style.display = 'none';
+
+      if (!value) {
+        saveBtn.classList.remove('visible');
         return;
       }
 
-      saveBtn.style.display = 'inline-flex';
-    }
+      if (countWords(value) < 3) {
+        saveBtn.classList.remove('visible');
+        return;
+      }
 
-    instructionEl.addEventListener('input', () => {
-      updateSaveTemplateFloatingVisibility();
+      if (templateExists(value)) {
+        saveBtn.classList.remove('visible');
+        return;
+      }
+
+      saveBtn.classList.add('visible');
     });
-
-    updateSaveTemplateFloatingVisibility();
 
     saveBtn?.addEventListener('click', () => {
       const name = window.prompt('Nombre de la plantilla:');
@@ -3621,7 +3629,7 @@ ${body}`.trim();
       saveTemplates(list);
       renderTemplateMenu();
 
-      saveBtn.style.display = 'none';
+      saveBtn.classList.remove('visible');
     });
 
     templatesBtn?.addEventListener('click', (event) => {
