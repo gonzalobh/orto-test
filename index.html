@@ -355,13 +355,19 @@
       line-height: 1.6;
     }
 
+    .instruction-wrapper {
+      position: relative;
+      width: 100%;
+    }
+
     #instruction {
       width: 100%;
       min-height: 88px;
       max-height: 320px;
       resize: none;
       line-height: 1.5;
-      padding: 14px 16px;
+      padding: 20px;
+      padding-bottom: 48px;
       border-radius: 12px;
       transition: height 0.15s ease,
                   box-shadow 0.2s ease;
@@ -374,13 +380,9 @@
       position: relative;
     }
 
-    .instruction-field {
-      position: relative;
-    }
-
     .save-template-floating {
       position: absolute;
-      right: 10px;
+      left: 10px;
       bottom: 10px;
       font-size: 12px;
       padding: 6px 10px;
@@ -422,6 +424,67 @@
       user-select: none;
       white-space: normal;
       z-index: 1;
+    }
+
+    .formalidad-trigger {
+      position: absolute;
+      right: 12px;
+      bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: #444;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 6px 8px;
+      border-radius: 8px;
+      transition: background 0.2s ease;
+      z-index: 3;
+    }
+
+    .formalidad-trigger:hover {
+      background: #fafaf9;
+    }
+
+    .formalidad-dropdown {
+      position: absolute;
+      right: 12px;
+      bottom: 44px;
+      background: white;
+      border: 1px solid #e5e5e5;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      padding: 6px;
+      min-width: 180px;
+      display: flex;
+      flex-direction: column;
+      animation: fadeUp 0.18s ease;
+      z-index: 4;
+    }
+
+    .formalidad-dropdown button {
+      background: none;
+      border: none;
+      text-align: left;
+      padding: 8px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .formalidad-dropdown button:hover {
+      background: #f5f5f4;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    @keyframes fadeUp {
+      from { opacity:0; transform: translateY(6px); }
+      to { opacity:1; transform: translateY(0); }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -504,59 +567,6 @@
       gap: 0.5rem;
       margin-bottom: 1.25rem;
     }
-
-    .segmented-control {
-      position: relative;
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 0;
-      padding: 4px;
-      background: #f4f4f5;
-      border: 1px solid #ececf1;
-      border-radius: 12px;
-      isolation: isolate;
-      --formality-index: 2;
-    }
-
-    .segmented-indicator {
-      position: absolute;
-      top: 4px;
-      left: 4px;
-      width: calc((100% - 8px) / 3);
-      height: calc(100% - 8px);
-      background: #ffffff;
-      border-radius: 10px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-      transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
-      transform: translateX(calc(var(--formality-index) * 100%));
-      z-index: 0;
-    }
-
-    .formality-btn {
-      background: transparent;
-      border: none;
-      border-radius: 10px;
-      color: #71717a;
-      font-family: inherit;
-      font-size: 14px;
-      font-weight: 500;
-      padding: 0.5rem 0.625rem;
-      cursor: pointer;
-      transition: color 200ms cubic-bezier(0.22, 1, 0.36, 1);
-      position: relative;
-      z-index: 1;
-    }
-
-    .formality-btn:hover,
-    .formality-btn:focus-visible {
-      color: #18181b;
-      outline: none;
-    }
-
-    .formality-btn.active {
-      color: #18181b;
-    }
-
 
     /* ===== Campos compartidos siempre visibles ===== */
 
@@ -1785,12 +1795,25 @@
               </button>
               <div class="custom-select-menu" id="templatesMenu" role="menu" hidden></div>
             </div>
-            <div class="instruction-field">
+            <div class="instruction-wrapper">
               <textarea
                 id="instruction"
+                placeholder="Escribe la idea en pocas palabras…"
                 maxlength="300"
                 aria-label="Describe brevemente el email que deseas generar"
               ></textarea>
+
+              <button id="formalidadTrigger" class="formalidad-trigger" type="button">
+                Formalidad
+                <i data-lucide="chevron-down"></i>
+              </button>
+
+              <div id="formalidadDropdown" class="formalidad-dropdown hidden">
+                <button type="button" data-value="auto">Automático</button>
+                <button type="button" data-value="tu">Tú (cercano)</button>
+                <button type="button" data-value="usted">Usted (formal)</button>
+              </div>
+
               <button id="saveTemplateFloating"
                 class="save-template-floating"
                 type="button">
@@ -1801,17 +1824,6 @@
             <div class="char-counter">
               <span id="charCount">0</span>/300
             </div>
-          </div>
-
-          <div class="input-group">
-            <label class="input-label" for="formalityPreference">Nivel de formalidad</label>
-            <div class="segmented-control" id="formalityControl" role="radiogroup" aria-label="Nivel de formalidad">
-              <span class="segmented-indicator" aria-hidden="true"></span>
-              <button class="formality-btn" type="button" role="radio" aria-checked="false" data-formality="tu">Tú (cercano)</button>
-              <button class="formality-btn" type="button" role="radio" aria-checked="false" data-formality="usted">Usted (formal)</button>
-              <button class="formality-btn active" type="button" role="radio" aria-checked="true" data-formality="auto">Automático</button>
-            </div>
-            <input type="hidden" id="formalityPreference" value="auto" />
           </div>
 
           <div class="shared-fields">
@@ -1904,9 +1916,8 @@
     const clientNameEl = document.getElementById('clientName');
     const senderRoleEl = document.getElementById('senderRole');
     const recipientRoleEl = document.getElementById('clientRole');
-    const formalityPrefEl = document.getElementById('formalityPreference');
-    const formalityControlEl = document.getElementById('formalityControl');
-    const formalityBtns = Array.from(document.querySelectorAll('.formality-btn'));
+    const trigger = document.getElementById('formalidadTrigger');
+    const dropdown = document.getElementById('formalidadDropdown');
     const outputEl = document.getElementById('output');
     const tabNewBtn = document.getElementById('tabNew');
     const tabHistoryBtn = document.getElementById('historyBtn');
@@ -1948,6 +1959,8 @@
     let instructionHintResumeTimer = null;
     let instructionHintTransitionTimer = null;
     let instructionHintTypingTimer = null;
+    let formalidadValue = 'auto';
+
 
     function autoGrow(el) {
       if (!el) return;
@@ -1975,84 +1988,28 @@
         .trim();
     }
 
-    function setFormalityPreference(value) {
-      const next = value === 'tu' || value === 'usted' ? value : 'auto';
-      if (formalityPrefEl) {
-        formalityPrefEl.value = next;
-      }
-      formalityBtns.forEach((btn, index) => {
-        const selected = btn.dataset.formality === next;
-        btn.classList.toggle('active', selected);
-        btn.setAttribute('aria-checked', selected ? 'true' : 'false');
-        if (selected && formalityControlEl) {
-          formalityControlEl.style.setProperty('--formality-index', String(index));
+    trigger?.addEventListener('click', () => {
+      dropdown?.classList.toggle('hidden');
+    });
+
+    dropdown?.querySelectorAll('button').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        formalidadValue = btn.dataset.value || 'auto';
+
+        if (trigger) {
+          trigger.childNodes[0].nodeValue = `${btn.innerText.split('(')[0].trim()} `;
         }
+
+        dropdown?.classList.add('hidden');
       });
-    }
+    });
 
-    function detectFormality({ instruction, senderRole, recipientRole, originalEmail, mode }) {
-      const context = normalizeText([instruction, senderRole, recipientRole].filter(Boolean).join(' '));
-      const original = normalizeText(originalEmail || '');
-      let ustedScore = 0;
-      let tuScore = 0;
-
-      const ustedSignals = [
-        /\busted\b/,
-        /\ble\b/,
-        /\bsu\b/,
-        /agradeceria/,
-        /quedo a su disposicion/,
-        /atentamente/,
-        /cordialmente/,
-        /estimad[oa]/
-      ];
-      const tuSignals = [
-        /\btu\b/,
-        /\bte\b/,
-        /\btu\s+\w+/,
-        /\bhola\b/,
-        /\bque tal\b/
-      ];
-      const seniorRoleSignals = [
-        /director/,
-        /gerent/,
-        /\bceo\b/,
-        /\bcfo\b/,
-        /\bcto\b/,
-        /president/,
-        /abogad/,
-        /notari/,
-        /rrhh/,
-        /\bjef/,
-        /recursos humanos/
-      ];
-      const closeSignals = [/interno/, /colega/, /equipo/, /companer/];
-
-      if (ustedSignals.some((r) => r.test(context))) ustedScore += 2;
-      if (tuSignals.some((r) => r.test(context))) tuScore += 2;
-      if (seniorRoleSignals.some((r) => r.test(normalizeText(recipientRole)))) ustedScore += 2;
-      if (closeSignals.some((r) => r.test(context))) tuScore += 1;
-
-      if (mode === 'reply' && original) {
-        if (/\busted\b|\bsu\b|\ble\b|agradeceria/.test(original)) ustedScore += 3;
-        if (/\btu\b|\bte\b|\bhola\b/.test(original)) tuScore += 2;
+    document.addEventListener('click', (e) => {
+      if (!trigger || !dropdown) return;
+      if (!trigger.contains(e.target) && !dropdown.contains(e.target)) {
+        dropdown.classList.add('hidden');
       }
-
-      return ustedScore >= tuScore ? 'usted' : 'tu';
-    }
-
-    function resolveFormality() {
-      const preference = formalityPrefEl?.value || 'auto';
-      const detected = detectFormality({
-        instruction: instructionEl?.value || '',
-        senderRole: senderRoleEl?.value || '',
-        recipientRole: recipientRoleEl?.value || '',
-        originalEmail: originalEmailEl?.value || '',
-        mode: currentMode
-      });
-      const resolved = preference === 'auto' ? detected : preference;
-      return { preference, detected: preference === 'auto' ? detected : resolved, resolved };
-    }
+    });
 
     function shouldDisableGenerateButton() {
       const instruction = instructionEl?.value.trim() || '';
@@ -2327,7 +2284,7 @@
         senderRole: document.getElementById('senderRole').value,
         clientName: document.getElementById('clientName').value,
         clientRole: document.getElementById('clientRole').value,
-        formality: document.getElementById('formalityPreference').value,
+        formalidad: formalidadValue,
         recipientRegion: document.getElementById('recipientRegion').value,
         mode: document.querySelector('.mode-toggle-btn.active')?.dataset.mode || 'compose'
       };
@@ -2369,7 +2326,12 @@
       senderRoleEl.value = data.senderRole || '';
       clientNameEl.value = data.clientName || '';
       recipientRoleEl.value = data.clientRole || '';
-      setFormalityPreference(data.formality || 'auto');
+      const templateFormalidad = data.formalidad ?? data.formality;
+      formalidadValue = templateFormalidad === 'tu' || templateFormalidad === 'usted' ? templateFormalidad : 'auto';
+      if (trigger) {
+        const labels = { auto: 'Automático', tu: 'Tú', usted: 'Usted' };
+        trigger.childNodes[0].nodeValue = `${labels[formalidadValue] || 'Automático'} `;
+      }
       updateRecipientRegionSelection(data.recipientRegion || '');
       setMode(data.mode || 'compose');
 
@@ -3327,35 +3289,12 @@ ${body}`.trim();
       }
       updatePreviewIfEmpty();
       updateGenerateButtonState();
-      if ((formalityPrefEl?.value || 'auto') === 'auto') {
-        resolveFormality();
-      }
     });
 
     originalEmailEl?.addEventListener('input', () => {
       updateGenerateButtonState();
-      if ((formalityPrefEl?.value || 'auto') === 'auto') {
-        resolveFormality();
-      }
     });
 
-    formalityBtns.forEach((btn) => {
-      btn.addEventListener('click', () => {
-        setFormalityPreference(btn.dataset.formality);
-      });
-    });
-
-    senderRoleEl?.addEventListener('input', () => {
-      if ((formalityPrefEl?.value || 'auto') === 'auto') {
-        resolveFormality();
-      }
-    });
-
-    recipientRoleEl?.addEventListener('input', () => {
-      if ((formalityPrefEl?.value || 'auto') === 'auto') {
-        resolveFormality();
-      }
-    });
 
     versionsControl?.addEventListener('click', (event) => {
       const option = event.target.closest('.versions-option');
@@ -3410,8 +3349,6 @@ ${body}`.trim();
     senderNameEl.addEventListener('input', updatePreviewIfEmpty);
     clientNameEl.addEventListener('input', updatePreviewIfEmpty);
 
-    setFormalityPreference(formalityPrefEl?.value || 'auto');
-
     function updatePreviewIfEmpty() {
       // Solo actualizar si estamos en estado vacío
       const emptyState = outputEl.querySelector('.empty-state');
@@ -3444,7 +3381,7 @@ ${body}`.trim();
       const clientInput = clientNameEl.value.trim();
       const senderRole = senderRoleEl?.value.trim() || '';
       const recipientRole = recipientRoleEl?.value.trim() || '';
-      const formality = resolveFormality();
+      const formality = formalidadValue;
 
       const senderName = senderInput || 'El equipo';
       const clientName = clientInput || 'cliente';
@@ -3476,7 +3413,7 @@ ${body}`.trim();
             recipientRegion: document.getElementById("recipientRegion")?.value || "",
             senderRole,
             recipientRole,
-            formality,
+            formalidad: formality,
             versions
           })
         });
